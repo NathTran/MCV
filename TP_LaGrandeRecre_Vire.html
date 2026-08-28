@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TP — La Grande Récré à Vire Normandie</title>
+<style>
+  :root{
+    --navy:#13294B; --blue:#1F6FEB; --teal:#0F766E; --purple:#6D28D9; --coral:#C2410C;
+    --green:#15803D; --gold:#A16207; --grey:#525252; --lightgrey:#F4F4F5;
+    --bg:#FBFAF7; --line:#E4E1D8; --accent:#E8622C;
+    --ok:#15803D; --bad:#C2410C;
+    font-family: "Iowan Old Style","Palatino Linotype",Georgia,serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:#1c1c1c;line-height:1.5;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px;}
+  header.top{background:var(--navy);color:#fff;padding:28px 20px 22px;}
+  header.top .wrap{padding:0 20px;}
+  .kicker{font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9fb3d1;margin:0 0 6px;}
+  h1{font-size:28px;margin:0 0 6px;font-weight:700;}
+  .sub{font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#c9d4e6;margin:0;}
+  nav.tabs{position:sticky;top:0;background:#fff;border-bottom:2px solid var(--line);z-index:50;font-family:Arial,Helvetica,sans-serif;}
+  nav.tabs .wrap{display:flex;gap:2px;padding:0 20px;overflow-x:auto;}
+  nav.tabs button{border:none;background:none;padding:14px 14px;font-size:13px;font-weight:700;color:#8a8a8a;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  nav.tabs button.active{color:var(--navy);border-bottom-color:var(--accent);}
+  nav.tabs button.locked{color:#c4c4c4;cursor:not-allowed;}
+  nav.tabs button.locked::after{content:" 🔒";font-size:10px;}
+  section.mission{display:none;padding-top:26px;}
+  section.mission.active{display:block;}
+  h2.mtitle{font-size:22px;color:var(--navy);border-bottom:2px solid var(--navy);padding-bottom:8px;margin:0 0 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  h3.stitle{font-family:Arial,Helvetica,sans-serif;font-size:15px;color:var(--navy);text-transform:uppercase;letter-spacing:.03em;margin:26px 0 10px;}
+  .box{border-radius:6px;padding:16px 18px;margin:0 0 16px;font-size:15px;}
+  .box p{margin:0 0 8px;}
+  .box p:last-child{margin-bottom:0;}
+  .box ul{margin:6px 0 0;padding-left:20px;}
+  .box.context{background:#E8EEF9;border-left:4px solid var(--blue);}
+  .box.doc{background:#F4F4F5;border-left:4px solid var(--grey);}
+  .box.task{background:#F1E9FB;border-left:4px solid var(--purple);}
+  .box.digital{background:#E4F5F3;border-left:4px solid var(--teal);font-family:Arial,Helvetica,sans-serif;font-size:13.5px;}
+  .box.tip{background:#FBE9E1;border-left:4px solid var(--coral);font-family:Arial,Helvetica,sans-serif;font-size:13.5px;}
+  .box.rappel{background:#FBF3DE;border-left:4px solid var(--gold);}
+  .btitle{font-weight:700;margin-bottom:6px;display:block;}
+  .doc .btitle{color:var(--grey);}
+  .task .btitle{color:var(--purple);}
+  .context .btitle{color:var(--blue);}
+  .rappel .btitle{color:var(--gold);}
+
+  table.calc{width:100%;border-collapse:collapse;margin:10px 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;}
+  table.calc th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:600;}
+  table.calc td{padding:7px 10px;border-bottom:1px solid var(--line);}
+  table.calc tr.worked td{background:#E4F3E6;font-style:italic;}
+  table.calc tr.total td{background:var(--lightgrey);font-weight:700;}
+  table.calc input[type=text]{
+    width:100%;border:1px solid #c8c8c8;border-radius:4px;padding:5px 7px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;
+  }
+  input.ok{border-color:var(--ok) !important;background:#EAF7EE !important;}
+  input.bad{border-color:var(--bad) !important;background:#FCEEEA !important;}
+  select.zonesel{width:100%;border:1px solid #c8c8c8;border-radius:4px;padding:5px 7px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;background:#fff;}
+  select.zonesel.ok{border-color:var(--ok);background:#EAF7EE;}
+  select.zonesel.bad{border-color:var(--bad);background:#FCEEEA;}
+
+  .verify-btn{font-family:Arial,Helvetica,sans-serif;background:var(--accent);color:#fff;border:none;padding:9px 16px;border-radius:5px;font-size:13.5px;font-weight:700;cursor:pointer;margin:4px 8px 6px 0;}
+  .verify-btn:hover{background:#c9531f;}
+  .print-btn{font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--navy);border:1.5px solid var(--navy);padding:7px 14px;border-radius:5px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .print-btn:hover{background:var(--navy);color:#fff;}
+  .feedback{font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:6px 0 4px;padding:8px 10px;border-radius:5px;display:none;}
+  .feedback.show{display:block;}
+  .feedback.allok{background:#E4F3E6;color:var(--green);}
+  .feedback.someerr{background:#FBE9E1;color:var(--coral);}
+
+  .blank{display:inline-block;min-width:110px;border:none;border-bottom:2px dotted #999;background:transparent;font-family:inherit;font-size:inherit;padding:1px 4px;color:var(--navy);font-weight:600;}
+  .blank:focus{outline:none;border-bottom-color:var(--accent);}
+  .blank.ok{border-bottom:2px solid var(--ok);background:#EAF7EE;}
+  .blank.bad{border-bottom:2px solid var(--bad);background:#FCEEEA;}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 16px;font-family:Arial,Helvetica,sans-serif;}
+  .summary-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px;text-align:center;}
+  .summary-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#8a8a8a;}
+  .summary-card .val{font-size:22px;font-weight:700;color:var(--navy);margin-top:4px;}
+
+  textarea.open{width:100%;min-height:70px;border:1px solid #c8c8c8;border-radius:5px;padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;resize:vertical;}
+  .idcard{width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;margin:10px 0 18px;}
+  .idcard td{border:1px solid var(--line);padding:9px 12px;}
+  .idcard td:first-child{background:var(--lightgrey);font-weight:700;width:34%;}
+  .idcard td:last-child input{width:100%;border:none;font-family:inherit;font-size:inherit;}
+
+  footer.note{font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#8a8a8a;font-style:italic;margin-top:40px;border-top:1px solid var(--line);padding-top:14px;}
+  .formula-band{background:var(--coral);color:#fff;text-align:center;border-radius:6px;padding:14px 18px;font-weight:700;font-size:14.5px;margin:10px 0 16px;font-family:Arial,Helvetica,sans-serif;}
+  .formula-band div{margin:3px 0;}
+
+  .quiz-card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:0 0 14px;background:#fff;}
+  .quiz-q{font-weight:700;margin-bottom:10px;font-size:15px;}
+  .quiz-opts label{display:block;font-family:Arial,Helvetica,sans-serif;font-size:14px;padding:7px 10px;margin-bottom:6px;border:1px solid #ddd;border-radius:6px;cursor:pointer;}
+  .quiz-opts label:hover{background:#f5f5f5;}
+  .quiz-opts input{margin-right:8px;}
+  .quiz-opts label.ok{border-color:var(--ok);background:#EAF7EE;}
+  .quiz-opts label.bad{border-color:var(--bad);background:#FCEEEA;}
+  .quiz-score{font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:14px;margin:10px 0;padding:10px 14px;border-radius:6px;display:none;}
+  .quiz-score.show{display:block;}
+
+  .round-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 20px;}
+  .round-btn{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid var(--line);border-radius:8px;padding:14px;text-align:left;cursor:pointer;font-size:13.5px;}
+  .round-btn:hover{border-color:var(--accent);}
+  .round-btn.active{border-color:var(--accent);background:#FDF1EA;}
+  .round-btn .rt{font-weight:700;color:var(--navy);display:block;margin-bottom:3px;}
+  .round-btn .rc{color:#8a8a8a;font-size:12px;}
+  .game-hud{display:flex;justify-content:space-between;align-items:center;font-family:Arial,Helvetica,sans-serif;margin:16px 0;flex-wrap:wrap;gap:10px;}
+  .game-hud .stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:13.5px;font-weight:700;color:var(--navy);}
+  .game-board{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .game-card{background:#fff;border:2px solid var(--line);border-radius:8px;padding:11px 13px;margin-bottom:9px;cursor:pointer;font-size:14px;line-height:1.35;transition:all .15s;font-family:Arial,Helvetica,sans-serif;}
+  .game-card:hover{border-color:var(--accent);}
+  .game-card.term{font-weight:700;color:var(--navy);}
+  .game-card.selected{border-color:var(--accent);background:#FDF1EA;box-shadow:0 0 0 2px rgba(232,98,44,.25);}
+  .game-card.matched{border-color:var(--ok);background:#EAF7EE;color:var(--ok);cursor:default;opacity:.75;}
+  .game-card.wrong{border-color:var(--bad);background:#FCEEEA;}
+  .game-win{display:none;text-align:center;background:#EAF7EE;border:2px solid var(--ok);border-radius:10px;padding:20px;margin-top:16px;font-family:Arial,Helvetica,sans-serif;}
+  .game-win.show{display:block;}
+  @media (max-width:640px){.round-menu, .game-board{grid-template-columns:1fr;}}
+
+  @media print{
+    nav.tabs, .verify-btn, .print-btn{display:none !important;}
+    body{background:#fff;}
+    header.top{background:#fff !important;color:#000 !important;padding:0 0 10px;}
+    header.top .sub{color:#444 !important;}
+    .kicker{color:#666 !important;}
+    section.mission{display:none !important;}
+    section.mission.printing{display:block !important;}
+    .box{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="kicker">TP de révision — Chapitre 1 — Première Bac Pro MCV</p>
+    <h1>La Grande Récré à Vire Normandie</h1>
+    <p class="sub">Connaître le marché et déterminer la zone de chalandise — outil autonome, 3 missions de 2h (6h au total)</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tabbtn active" data-target="m0" id="tab-m0">Fiche d'identité</button>
+    <button class="tabbtn" data-target="m1" id="tab-m1">Mission 1</button>
+    <button class="tabbtn locked" data-target="m2" id="tab-m2">Mission 2</button>
+    <button class="tabbtn locked" data-target="m3" id="tab-m3">Mission 3</button>
+    <button class="tabbtn locked" data-target="m4" id="tab-m4">Synthèse</button>
+    <button class="tabbtn" data-target="m5" id="tab-m5">🧩 Jeu de paires</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ M0 : PAGE DE GARDE ============ -->
+<section class="mission active" id="m0">
+  <h2 class="mtitle">Avant de commencer <button class="print-btn" onclick="printMission('m0')">🖨️ Imprimer cette page</button></h2>
+
+  <div class="box context">
+    <span class="btitle">Compétences et résultats attendus</span>
+    <p>Assurer la veille commerciale : rechercher, hiérarchiser, exploiter et actualiser en continu les informations sur l'entreprise et son marché.</p>
+    <ul>
+      <li>L'information recueillie et sélectionnée est fiable, récente et utile.</li>
+      <li>L'information est hiérarchisée et exploitée de façon pertinente.</li>
+      <li>Les outils de recherche d'information utilisés sont adaptés.</li>
+    </ul>
+  </div>
+
+  <div class="box task">
+    <span class="btitle">Pour commencer, une question toute simple</span>
+    <p><em>Pourquoi un vendeur ne peut-il pas se contenter de son expérience et du bouche-à-oreille pour bien conseiller ses clients ?</em> Discutez-en avant de commencer.</p>
+    <textarea class="open" placeholder="Votre réponse..."></textarea>
+  </div>
+
+  <h3 class="stitle">Fiche d'identité de l'entreprise (à compléter)</h3>
+  <div class="box digital">💻 Outil numérique — recherchez sur lagranderecre.fr et dans la presse professionnelle (LSA, Officiel de la Franchise) pour compléter cette fiche.</div>
+  <table class="idcard">
+    <tr><td>Raison sociale</td><td><input type="text"></td></tr>
+    <tr><td>Activité</td><td><input type="text"></td></tr>
+    <tr><td>Type de commerce</td><td><input type="text"></td></tr>
+    <tr><td>Statut juridique</td><td><input type="text"></td></tr>
+    <tr><td>Localisation (Vire Normandie)</td><td><input type="text"></td></tr>
+    <tr><td>Concurrents</td><td><input type="text"></td></tr>
+  </table>
+</section>
+
+<!-- ============ MISSION 1 ============ -->
+<section class="mission" id="m1">
+  <h2 class="mtitle">Mission 1 (2h) — Situer le point de vente sur son marché <button class="print-btn" onclick="printMission('m1')">🖨️ Imprimer cette mission</button></h2>
+
+  <div class="box context">
+    <span class="btitle">Contexte professionnel</span>
+    <p><em>« J'ai besoin de vous pour faire le point sur la situation du magasin au niveau local (région de Vire). Calculez l'évolution des ventes du magasin sur un an (annexe 1) et analysez le marché (annexe 2). Situer notre magasin sur son marché est indispensable pour évaluer nos performances, je compte sur vous ! »</em></p>
+  </div>
+
+  <h3 class="stitle">Document 1 — Le marché (rappel de cours à trous)</h3>
+  <div class="box rappel" id="box-d1">
+    <span class="btitle">Complétez de mémoire, puis vérifiez</span>
+    <p>Le marché est le lieu de <input class="blank" id="d1b1" size="10"> entre une <input class="blank" id="d1b2" size="8"> et une <input class="blank" id="d1b3" size="8"> concernant un produit.</p>
+    <p>L'<input class="blank" id="d1b4" size="8"> représente tous les acteurs qui proposent un bien ou un service : des <input class="blank" id="d1b5" size="10"> ou des <input class="blank" id="d1b6" size="10">.</p>
+    <button class="verify-btn" onclick="checkBlanks('box-d1', ['rencontre','offre','demande','offre','producteurs','distributeurs'])">Vérifier</button>
+    <div class="feedback" id="fb-box-d1"></div>
+  </div>
+
+  <h3 class="stitle">Document 2 — Le marché français du jouet</h3>
+  <div class="box doc">
+    <span class="btitle">Chiffres réels 2025 (source Circana / Fédération française des industries Jouet Puériculture)</span>
+    <p>Le marché français du jeu et du jouet a atteint <strong>4,7 milliards d'euros</strong> de chiffre d'affaires en 2025, en progression de <strong>7,1 %</strong> sur un an — la meilleure performance du secteur depuis 25 ans. Le prix moyen d'un jouet s'établit à 18 € (21 € à Noël). Les jouets sous licence représentent 30 % des ventes. Les « kidultes » (12 ans et plus) pèsent désormais un tiers du chiffre d'affaires du secteur. La vente en ligne représente 22 à 25 % des ventes.</p>
+    <p><em>Données pédagogiques complémentaires (fictives, cohérentes avec le secteur) :</em> budget moyen consacré aux jouets pour un enfant de 3 à 12 ans estimé à 155 € à Noël ; 52 % des parents consultent des avis en ligne avant d'acheter un jouet nouveau plutôt que de demander conseil en magasin ; 38 % des parents privilégient les jouets à forte notoriété ou sous licence.</p>
+  </div>
+
+  <h3 class="stitle">Document 3 — Les types d'acteurs d'un marché (rappel à trous)</h3>
+  <div class="box rappel" id="box-d3">
+    <p>Le <input class="blank" id="d3b1" size="8"> domine le marché et évite de le bousculer.</p>
+    <p>Le <input class="blank" id="d3b2" size="10"> est inventif et bouscule les règles pour tenter de prendre la première place.</p>
+    <p>Le <input class="blank" id="d3b3" size="8"> suit le leader sans jamais innover, avec des prix plus bas.</p>
+    <p>Le <input class="blank" id="d3b4" size="10"> se focalise sur une niche de consommateurs.</p>
+    <button class="verify-btn" onclick="checkBlanks('box-d3', ['leader','challenger','suiveur','specialiste'])">Vérifier</button>
+    <div class="feedback" id="fb-box-d3"></div>
+  </div>
+
+  <h3 class="stitle">Document 4 — Les acteurs du marché français du jouet</h3>
+  <div class="box doc">
+    <p>Sur le podium des enseignes spécialisées, on trouve JouéClub et La Grande Récré, réunis au sein du même groupe depuis le rachat de 2025, qui pèsent ensemble plus d'un quart des ventes de jouets réalisées en magasin spécialisé. King Jouet occupe la troisième place. À noter la montée en puissance de Maxi Toys et des ventes sur les marketplaces (Amazon, Cdiscount). La Grande Récré revendique une part de marché d'environ 9,5 % sur le segment des jouets vendus en magasin spécialisé en France.</p>
+  </div>
+  <div class="box task">
+    <span class="btitle">Identifiez 3 à 4 concurrents et qualifiez leur position</span>
+    <textarea class="open" placeholder="Ex. : JouéClub = leader, car..."></textarea>
+  </div>
+
+  <h3 class="stitle">Annexe 1 — 💻 Évolution des ventes dans la région de Vire</h3>
+  <div class="box digital">Les 3 premières lignes sont déjà calculées pour vous montrer la méthode. Complétez les 8 lignes suivantes, puis vérifiez.</div>
+  <table class="calc" id="tbl-annexe1">
+    <thead><tr><th>Point de vente</th><th>CA 2025 (k€)</th><th>CA 2026 (k€)</th><th>Part de marché 2026</th><th>Évolution 2025→2026</th></tr></thead>
+    <tbody>
+      <tr class="worked"><td>La Grande Récré Vire</td><td>520</td><td>549</td><td>13,66 %</td><td>+5,58 %</td></tr>
+      <tr class="worked"><td>JouéClub Flers</td><td>610</td><td>598</td><td>14,88 %</td><td>−1,97 %</td></tr>
+      <tr class="worked"><td>King Jouet Saint-Lô</td><td>480</td><td>512</td><td>12,74 %</td><td>+6,67 %</td></tr>
+      <tr><td>Rayon jouet Leclerc Vire</td><td>390</td><td>385</td><td><input type="text" id="a1-pm-4" data-correct="9.58"></td><td><input type="text" id="a1-ev-4" data-correct="-1.28"></td></tr>
+      <tr><td>Maxi Toys Caen (zone élargie)</td><td>340</td><td>368</td><td><input type="text" id="a1-pm-5" data-correct="9.15"></td><td><input type="text" id="a1-ev-5" data-correct="8.24"></td></tr>
+      <tr><td>Autres (dont vente en ligne)</td><td>710</td><td>738</td><td><input type="text" id="a1-pm-6" data-correct="18.36"></td><td><input type="text" id="a1-ev-6" data-correct="3.94"></td></tr>
+      <tr><td>Cultura Vire (rayon jouets/loisirs)</td><td>210</td><td>225</td><td><input type="text" id="a1-pm-7" data-correct="5.60"></td><td><input type="text" id="a1-ev-7" data-correct="7.14"></td></tr>
+      <tr><td>Auchan Caen (rayon jouet, zone élargie)</td><td>260</td><td>252</td><td><input type="text" id="a1-pm-8" data-correct="6.27"></td><td><input type="text" id="a1-ev-8" data-correct="-3.08"></td></tr>
+      <tr><td>Vinted / vide-greniers (occasion, estimation)</td><td>95</td><td>118</td><td><input type="text" id="a1-pm-9" data-correct="2.94"></td><td><input type="text" id="a1-ev-9" data-correct="24.21"></td></tr>
+      <tr><td>Micromania-Zing Caen (zone élargie)</td><td>180</td><td>196</td><td><input type="text" id="a1-pm-10" data-correct="4.88"></td><td><input type="text" id="a1-ev-10" data-correct="8.89"></td></tr>
+      <tr><td>Au Petit Poucet (indépendant, Vire)</td><td>85</td><td>79</td><td><input type="text" id="a1-pm-11" data-correct="1.97"></td><td><input type="text" id="a1-ev-11" data-correct="-7.06"></td></tr>
+      <tr class="total"><td>Total</td><td>3 880</td><td>4 020</td><td>100 %</td><td><input type="text" id="a1-ev-tot" data-correct="3.61"></td></tr>
+    </tbody>
+  </table>
+  <div style="font-size:13px;font-family:Arial,Helvetica,sans-serif;color:#666;margin-bottom:8px;">Rappel : part de marché = CA2026 ÷ total 2026 × 100. Évolution = (CA2026 − CA2025) ÷ CA2025 × 100. Entrez juste le nombre (ex. 12.2 ou -1.28), sans le signe %.</div>
+  <button class="verify-btn" onclick="verifyAnnexe1()">Vérifier mes calculs</button>
+  <div class="feedback" id="fb-annexe1"></div>
+
+  <h3 class="stitle">Annexe 2 — Analyse du marché et de l'offre dans la région de Vire</h3>
+  <table class="idcard">
+    <tr><td>Taille du marché national (en €)</td><td><input type="text"></td></tr>
+    <tr><td>Produits vendus</td><td><input type="text"></td></tr>
+    <tr><td>Entreprises nationales — Leader</td><td><input type="text"></td></tr>
+    <tr><td>Entreprises nationales — Challengers</td><td><input type="text"></td></tr>
+    <tr><td>Entreprises nationales — Suiveurs</td><td><input type="text"></td></tr>
+    <tr><td>Part de marché La Grande Récré</td><td><input type="text"></td></tr>
+    <tr><td>Entreprise leader locale (Vire)</td><td><input type="text"></td></tr>
+    <tr><td>Évolution du marché local (%)</td><td><input type="text"></td></tr>
+  </table>
+
+  <h3 class="stitle">🎯 Quiz de révision — Mission 1</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">1. Le marché du jouet a connu en 2025 sa plus forte progression depuis 25 ans.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q1-1" value="V"> Vrai</label>
+      <label><input type="radio" name="q1-1" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">2. Qui bouscule les règles du marché pour tenter de prendre la première place ?</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q1-2" value="a"> Le leader</label>
+      <label><input type="radio" name="q1-2" value="b"> Le challenger</label>
+      <label><input type="radio" name="q1-2" value="c"> Le suiveur</label>
+      <label><input type="radio" name="q1-2" value="d"> Le spécialiste</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">3. Les « kidultes » désignent des enfants de moins de 3 ans qui reçoivent des jouets en cadeau.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q1-3" value="V"> Vrai</label>
+      <label><input type="radio" name="q1-3" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">4. L'offre d'un marché est composée de :</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q1-4" value="a"> Clients et ménages</label>
+      <label><input type="radio" name="q1-4" value="b"> Producteurs et distributeurs</label>
+      <label><input type="radio" name="q1-4" value="c"> Régulateurs uniquement</label>
+      <label><input type="radio" name="q1-4" value="d"> Concurrents uniquement</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">5. La Grande Récré a été rachetée par le groupe JouéClub en 2025.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q1-5" value="V"> Vrai</label>
+      <label><input type="radio" name="q1-5" value="F"> Faux</label>
+    </div>
+  </div>
+  <button class="verify-btn" onclick="verifyQuiz('m1', {'q1-1':'V','q1-2':'b','q1-3':'F','q1-4':'b','q1-5':'V'})">Vérifier mon quiz</button>
+  <div class="quiz-score" id="quiz-score-m1"></div>
+
+  <div class="box context" id="m1-status" style="margin-top:20px;">
+    <span class="btitle">Progression</span>
+    <p id="m1-status-text">Complétez et vérifiez le Doc 1, le Doc 3, l'Annexe 1 et le quiz de révision (5/5) pour déverrouiller la Mission 2.</p>
+  </div>
+</section>
+
+<!-- ============ MISSION 2 ============ -->
+<section class="mission" id="m2">
+  <h2 class="mtitle">Mission 2 (2h) — Déterminer la zone de chalandise <button class="print-btn" onclick="printMission('m2')">🖨️ Imprimer cette mission</button></h2>
+
+  <div class="box context">
+    <span class="btitle">Contexte professionnel</span>
+    <p><em>« Je souhaite estimer le nombre de prospectus à distribuer pour la campagne de Noël. Identifiez dans quelles zones se situent les communes qui entourent notre point de vente (annexe 1), puis calculez le nombre de prospectus (annexe 2), sachant que la taille moyenne des foyers dans notre région est de 2,24 habitants. »</em></p>
+  </div>
+
+  <h3 class="stitle">Document 1 — Le concept de zone de chalandise</h3>
+  <div class="box doc">
+    <p>La zone de chalandise d'un magasin est la zone géographique de provenance de ses clients, potentiels ou réels. Sa détermination permet d'étudier le potentiel de vente en fonction de la population présente et de la concurrence. Elle peut être calculée avant l'implantation du magasin, ou après, pour optimiser les méthodes marketing (communication, signalétique, géomerchandising).</p>
+  </div>
+
+  <h3 class="stitle">Document 2 — La délimitation de la zone de chalandise (à trous)</h3>
+  <div class="box rappel" id="box-d2">
+    <p>La zone <input class="blank" id="d2b1" size="8"> correspond à l'attractivité la plus forte. La zone <input class="blank" id="d2b2" size="10"> correspond à une attractivité moyenne. La zone <input class="blank" id="d2b3" size="8"> correspond à une attractivité faible.</p>
+    <p>Une zone <input class="blank" id="d2b4" size="10"> est tracée à distance égale (ex. 5, 10, 20 km). Une zone <input class="blank" id="d2b5" size="9"> est tracée à durée de trajet égale (ex. 5, 10, 20 minutes).</p>
+    <button class="verify-btn" onclick="checkBlanks('box-d2', ['primaire','secondaire','tertiaire','isometrique','isochrone'])">Vérifier</button>
+    <div class="feedback" id="fb-box-d2"></div>
+  </div>
+
+  <h3 class="stitle">Annexe 1 — 💻 Étude de la zone de chalandise</h3>
+  <div class="box digital">Les 16 communes ci-dessous sont réelles (communes déléguées de Vire Normandie et communes voisines de l'Intercom de la Vire au Noireau, données 2020-2023, à réactualiser sur insee.fr si besoin). <strong>Vérifiez le temps de trajet réel depuis le centre de Vire sur Google Maps ou Smappen</strong>, puis choisissez la zone qui correspond dans le menu déroulant.</div>
+  <table class="calc" id="tbl-zones">
+    <thead><tr><th>Commune</th><th>Population (2020)</th><th>Temps de trajet (à vérifier)</th><th>Zone</th></tr></thead>
+    <tbody>
+      <tr data-pop="10906" data-correct="P"><td>Vire (centre)</td><td>10 906</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="2035" data-correct="P"><td>Saint-Germain-de-Tallevende-la-Lande-Vaumont</td><td>2 035</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="1437" data-correct="S"><td>Vaudry</td><td>1 437</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="921" data-correct="P"><td>Roullours</td><td>921</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="795" data-correct="S"><td>Coulonces</td><td>795</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="625" data-correct="T"><td>Truttemer-le-Grand</td><td>625</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="448" data-correct="S"><td>Maisoncelles-la-Jourdan</td><td>448</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="99" data-correct="T"><td>Truttemer-le-Petit</td><td>99</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="750" data-correct="T"><td>Sainte-Marie-Laumont</td><td>750</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="766" data-correct="T"><td>Viessoix</td><td>766</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="2100" data-correct="T"><td>Vassy</td><td>2 100</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="194" data-correct="T"><td>Le Theil-Bocage</td><td>194</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="211" data-correct="T"><td>Pierres</td><td>211</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="22" data-correct="T"><td>Malloué</td><td>22</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="900" data-correct="T"><td>Terres de Druance</td><td>900</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+      <tr data-pop="700" data-correct="T"><td>Saint-Denis-de-Méré</td><td>700</td><td><input type="text" placeholder="min"></td><td>
+        <select class="zonesel"><option value="">— choisir —</option><option value="P">Primaire</option><option value="S">Secondaire</option><option value="T">Tertiaire</option></select></td></tr>
+    </tbody>
+  </table>
+  <div class="box tip">Les 8 premières communes appartiennent à la commune nouvelle de Vire Normandie (fusion 2016) ; les 8 suivantes sont des communes ou villages voisins de l'intercommunalité (Souleuvre en Bocage, Valdallière, Terres de Druance...). Leur classement dépend de la distance réelle au point de vente. Vérifiez avec Google Maps avant de choisir — une mauvaise classification sera signalée par « Vérifier mes zones ».</div>
+  <button class="verify-btn" onclick="verifyZones()">Vérifier mes zones</button>
+  <div class="feedback" id="fb-zones"></div>
+
+  <div class="summary-grid" id="zone-summary">
+    <div class="summary-card"><div class="lbl">Population primaire</div><div class="val" id="pop-P">—</div></div>
+    <div class="summary-card"><div class="lbl">Population secondaire</div><div class="val" id="pop-S">—</div></div>
+    <div class="summary-card"><div class="lbl">Population tertiaire</div><div class="val" id="pop-T">—</div></div>
+  </div>
+
+  <h3 class="stitle">Annexe 2 — 💻 Nombre de prospectus à distribuer</h3>
+  <div class="box rappel">Taux de couverture : primaire 90 %, secondaire 75 %, tertiaire 60 %. Nombre de ménages = population ÷ 2,24. Nombre de prospectus = ménages × taux de couverture.</div>
+  <table class="calc" id="tbl-prospectus">
+    <thead><tr><th>Zone</th><th>Population</th><th>Nombre de ménages</th><th>Prospectus</th></tr></thead>
+    <tbody>
+      <tr><td>Primaire (90 %)</td><td id="disp-pop-P">—</td>
+        <td><input type="text" id="a2-men-P"></td>
+        <td><input type="text" id="a2-pro-P"></td></tr>
+      <tr><td>Secondaire (75 %)</td><td id="disp-pop-S">—</td>
+        <td><input type="text" id="a2-men-S"></td>
+        <td><input type="text" id="a2-pro-S"></td></tr>
+      <tr><td>Tertiaire (60 %)</td><td id="disp-pop-T">—</td>
+        <td><input type="text" id="a2-men-T"></td>
+        <td><input type="text" id="a2-pro-T"></td></tr>
+      <tr class="total"><td>Total</td><td id="disp-pop-tot">—</td>
+        <td><input type="text" id="a2-men-tot"></td>
+        <td><input type="text" id="a2-pro-tot"></td></tr>
+    </tbody>
+  </table>
+  <div style="font-size:12.5px;font-family:Arial,Helvetica,sans-serif;color:#888;margin-bottom:8px;">La colonne Population se remplit automatiquement une fois vos zones validées ci-dessus. À vous de calculer vous-même le nombre de ménages et de prospectus, zone par zone, puis le total.</div>
+  <button class="verify-btn" onclick="verifyAnnexe2()">Vérifier mes calculs</button>
+  <div class="feedback" id="fb-annexe2"></div>
+
+  <h3 class="stitle">🎯 Quiz de révision — Mission 2</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">1. Quelle zone a l'attractivité la plus forte ?</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q2-1" value="a"> Primaire</label>
+      <label><input type="radio" name="q2-1" value="b"> Secondaire</label>
+      <label><input type="radio" name="q2-1" value="c"> Tertiaire</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">2. Une courbe isométrique est tracée en fonction du temps de trajet.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q2-2" value="V"> Vrai</label>
+      <label><input type="radio" name="q2-2" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">3. Le taux de couverture le plus élevé est appliqué à la zone :</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q2-3" value="a"> Primaire</label>
+      <label><input type="radio" name="q2-3" value="b"> Secondaire</label>
+      <label><input type="radio" name="q2-3" value="c"> Tertiaire</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">4. Le nombre de ménages se calcule en divisant la population par la taille moyenne d'un foyer.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q2-4" value="V"> Vrai</label>
+      <label><input type="radio" name="q2-4" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">5. Une zone de chalandise sert avant tout à :</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q2-5" value="a"> Fixer les salaires des vendeurs</label>
+      <label><input type="radio" name="q2-5" value="b"> Étudier le potentiel de vente selon la population et la concurrence</label>
+      <label><input type="radio" name="q2-5" value="c"> Remplacer la comptabilité de l'entreprise</label>
+    </div>
+  </div>
+  <button class="verify-btn" onclick="verifyQuiz('m2', {'q2-1':'a','q2-2':'F','q2-3':'a','q2-4':'V','q2-5':'b'})">Vérifier mon quiz</button>
+  <div class="quiz-score" id="quiz-score-m2"></div>
+
+  <div class="box context" id="m2-status" style="margin-top:20px;">
+    <span class="btitle">Progression</span>
+    <p id="m2-status-text">Validez le Document 2, les 16 zones, l'Annexe 2 et le quiz de révision (5/5) pour déverrouiller la Mission 3.</p>
+  </div>
+</section>
+
+<!-- ============ MISSION 3 ============ -->
+<section class="mission" id="m3">
+  <h2 class="mtitle">Mission 3 (2h) — Calculer le chiffre d'affaires prévisionnel <button class="print-btn" onclick="printMission('m3')">🖨️ Imprimer cette mission</button></h2>
+
+  <div class="box context">
+    <span class="btitle">Contexte professionnel</span>
+    <p><em>« L'objectif de la campagne de Noël est d'atteindre 400 000 € de chiffre d'affaires sur la zone. Calculez le nombre de ménages effectuant leurs dépenses dans la zone (annexe 1) et notre chiffre d'affaires prévisionnel (annexe 2). »</em></p>
+  </div>
+
+  <h3 class="stitle">Document 1 — Évasion et attraction commerciales</h3>
+  <div class="box doc">
+    <p>Le <strong>taux d'évasion commerciale</strong> désigne la part des dépenses effectuées dans des commerces en dehors de la zone (à déduire). Le <strong>taux d'attraction commerciale</strong> désigne la part des dépenses issue d'habitants n'appartenant pas à la zone (à ajouter).</p>
+  </div>
+
+  <h3 class="stitle">Document 2 — Données statistiques (mémo)</h3>
+  <div class="box task">
+    <ul>
+      <li>Taux d'évasion : primaire 15 % ; secondaire 22 % ; tertiaire 30 %.</li>
+      <li>Taux d'attraction : 8 % du nombre de ménages hors zone, soit 898 ménages.</li>
+      <li>Dépenses moyennes commercialisables en jouets par an et par ménage : 220 €.</li>
+      <li>Part de la concurrence : 78 % des dépenses de la zone.</li>
+    </ul>
+  </div>
+  <div class="formula-band">
+    <div>CA prévisionnel = Dépenses sur la zone − Évasion commerciale</div>
+    <div>+ Attraction commerciale − Part de la concurrence</div>
+  </div>
+
+  <h3 class="stitle">Annexe 1 — 💻 Ménages après évasion (à partir de la Mission 2)</h3>
+  <table class="calc" id="tbl-evasion">
+    <thead><tr><th>Zone</th><th>Ménages (Mission 2)</th><th>Taux évasion</th><th>Ménages après évasion</th></tr></thead>
+    <tbody>
+      <tr><td>Primaire</td><td id="ev-men-P">—</td><td>15 %</td><td id="ev-res-P">—</td></tr>
+      <tr><td>Secondaire</td><td id="ev-men-S">—</td><td>22 %</td><td id="ev-res-S">—</td></tr>
+      <tr><td>Tertiaire</td><td id="ev-men-T">—</td><td>30 %</td><td id="ev-res-T">—</td></tr>
+      <tr class="total"><td>Total</td><td id="ev-men-tot">—</td><td></td><td id="ev-res-tot">—</td></tr>
+    </tbody>
+  </table>
+  <button class="verify-btn" onclick="recalcEvasion()">Calculer à partir de mes zones (Mission 2)</button>
+
+  <h3 class="stitle">Annexe 2 — 💻 Calcul du chiffre d'affaires prévisionnel</h3>
+  <table class="calc" id="tbl-caprev">
+    <tbody>
+      <tr><td>Ménages après évasion</td><td id="ca-1">—</td></tr>
+      <tr><td>Ménages après attraction (+ 898)</td><td id="ca-2">—</td></tr>
+      <tr><td>Dépenses commercialisables (× 220 €)</td><td id="ca-3">—</td></tr>
+      <tr><td>Part de la concurrence (× 78 %)</td><td id="ca-4">—</td></tr>
+      <tr class="total"><td>CA prévisionnel annuel</td><td id="ca-5">—</td></tr>
+    </tbody>
+  </table>
+  <div class="box task">
+    <span class="btitle">Conclusion</span>
+    <p>L'objectif de 400 000 € est-il atteint ?</p>
+    <textarea class="open" id="m3-conclusion" placeholder="Votre analyse..." onblur="checkM3Done()"></textarea>
+  </div>
+
+  <h3 class="stitle">Document 3 — L'évolution du marché</h3>
+  <div class="box doc">
+    <p>De nouveaux concepts apparaissent sur le marché du jouet : le segment de l'occasion, de l'échange et du partage progresse fortement, porté par le digital et le mobile. Les « kidultes » redéfinissent la nature du marché, qui n'est plus associé uniquement à l'enfance et à la saisonnalité de Noël. Les marketplaces et plateformes collaboratives gagnent du terrain.</p>
+  </div>
+
+  <h3 class="stitle">Document 4 — Le prospectus de Noël d'un concurrent</h3>
+  <div class="box context">
+    <span class="btitle">Contexte professionnel</span>
+    <p><em>« On dirait que JouéClub et Leclerc affichent des prix différents des nôtres sur le même LEGO Star Wars. Mais attention : Leclerc fait cagnotter 25 % sur la carte de fidélité, alors que nous n'avons rien. Avant de dire qui est le moins cher, il faut regarder ce que ça change vraiment pour le client — et pour nous. »</em></p>
+  </div>
+
+  <h3 class="stitle">Document 5 — Taux de marque et taux de marge : à quoi ça sert ?</h3>
+  <div class="box rappel">
+    <p><strong>Marge commerciale</strong> = Prix de vente HT − Coût d'achat HT</p>
+    <p><strong>Taux de marque</strong> = (Marge ÷ Prix de vente HT) × 100 → répond à la question : « Sur chaque euro payé par le client, combien me reste-t-il ? » C'est l'indicateur utilisé pour piloter une politique de prix et se comparer à la concurrence, prix de vente contre prix de vente.</p>
+    <p><strong>Taux de marge</strong> = (Marge ÷ Coût d'achat HT) × 100 → répond à la question : « Par rapport à ce que ça m'a coûté, combien ai-je gagné en plus ? » C'est l'indicateur utilisé côté achats, pour juger si un produit acheté à tel prix fournisseur est rentable.</p>
+    <p>Pour un même produit, le taux de marge est toujours supérieur au taux de marque (le coût d'achat est toujours inférieur au prix de vente HT). Les deux ne mesurent pas la même chose : le premier regarde vers le client, le second regarde vers le fournisseur.</p>
+  </div>
+
+  <h3 class="stitle">Document 6 — La fidélité change la donne</h3>
+  <div class="box doc">
+    <p>Un même LEGO Star Wars (coût d'achat pour le distributeur : 45 € HT) est vendu à des prix différents, avec ou sans programme de fidélité :</p>
+    <ul>
+      <li><strong>La Grande Récré</strong> : 84 € TTC, pas de programme de fidélité.</li>
+      <li><strong>JouéClub</strong> : 79 € TTC, carte de fidélité classique : 3 % du montant cagnotté, à valoir sur un prochain achat.</li>
+      <li><strong>Leclerc</strong> : 95 € TTC (le prix affiché le plus élevé), mais la carte de fidélité fait cagnotter 25 % du montant.</li>
+    </ul>
+    <p>Le prix affiché n'est donc pas le seul élément à regarder : il faut aussi calculer ce que le client paie réellement une fois la cagnotte utilisée, et ce qu'il reste à l'enseigne une fois la cagnotte financée.</p>
+  </div>
+
+  <h3 class="stitle">Annexe 3 — 💻 Comparer les 3 enseignes : pour le client, pour l'enseigne (Excel)</h3>
+  <div class="box digital">Pour chacune des 3 enseignes, calculez le montant de la cagnotte, le prix net réellement payé par le client, le prix de vente HT, la marge affichée, le taux de marque, puis la marge réelle de l'enseigne une fois la cagnotte financée (marge affichée − cagnotte).</div>
+  <table class="calc" id="tbl-annexe3">
+    <thead><tr><th>Enseigne</th><th>PV TTC</th><th>Cagnotte</th><th>Prix net client</th><th>PV HT</th><th>Marge affichée</th><th>Taux de marque</th><th>Marge réelle enseigne</th></tr></thead>
+    <tbody>
+      <tr><td>La Grande Récré (0 % cagnotte)</td><td>84 €</td>
+        <td><input type="text" id="a3-cag-1" data-correct="0"></td>
+        <td><input type="text" id="a3-net-1" data-correct="84"></td>
+        <td><input type="text" id="a3-pvht-1" data-correct="70"></td>
+        <td><input type="text" id="a3-marge-1" data-correct="25"></td>
+        <td><input type="text" id="a3-tm-1" data-correct="35.71"></td>
+        <td><input type="text" id="a3-mreelle-1" data-correct="25"></td></tr>
+      <tr><td>JouéClub (3 % cagnotte)</td><td>79 €</td>
+        <td><input type="text" id="a3-cag-2" data-correct="2.37"></td>
+        <td><input type="text" id="a3-net-2" data-correct="76.63"></td>
+        <td><input type="text" id="a3-pvht-2" data-correct="65.83"></td>
+        <td><input type="text" id="a3-marge-2" data-correct="20.83"></td>
+        <td><input type="text" id="a3-tm-2" data-correct="31.64"></td>
+        <td><input type="text" id="a3-mreelle-2" data-correct="18.46"></td></tr>
+      <tr><td>Leclerc (25 % cagnotte)</td><td>95 €</td>
+        <td><input type="text" id="a3-cag-3" data-correct="23.75"></td>
+        <td><input type="text" id="a3-net-3" data-correct="71.25"></td>
+        <td><input type="text" id="a3-pvht-3" data-correct="79.17"></td>
+        <td><input type="text" id="a3-marge-3" data-correct="34.17"></td>
+        <td><input type="text" id="a3-tm-3" data-correct="43.16"></td>
+        <td><input type="text" id="a3-mreelle-3" data-correct="10.42"></td></tr>
+    </tbody>
+  </table>
+  <div style="font-size:13px;font-family:Arial,Helvetica,sans-serif;color:#666;margin-bottom:8px;">Rappel : Cagnotte = PV TTC × taux de cagnotte. Prix net client = PV TTC − Cagnotte. PV HT = PV TTC ÷ 1,2. Marge affichée = PV HT − 45. Taux de marque = Marge ÷ PV HT × 100. Marge réelle enseigne = Marge affichée − Cagnotte (simplification pédagogique : on impute le coût de la cagnotte, calculé en TTC, directement sur la marge).</div>
+  <button class="verify-btn" onclick="verifyAnnexe3()">Vérifier mes calculs</button>
+  <div class="feedback" id="fb-annexe3"></div>
+
+  <div class="box task">
+    <span class="btitle">Analyse : deux points de vue qui ne donnent pas le même gagnant</span>
+    <p>Quelle enseigne est la plus intéressante <strong>pour le client</strong> (prix net le plus bas) ? Quelle enseigne est la plus rentable <strong>pour elle-même</strong> (marge réelle la plus élevée) ? Ces deux réponses sont-elles les mêmes ? Que peut-on en conclure sur la stratégie de fidélisation de Leclerc (parie-t-il sur la marge immédiate, ou sur autre chose) ?</p>
+    <textarea class="open" placeholder="Votre analyse..."></textarea>
+  </div>
+
+  <h3 class="stitle">🎯 Quiz de révision — Mission 3</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">1. Le taux d'évasion commerciale doit être ajouté dans le calcul du CA prévisionnel.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q3-1" value="V"> Vrai</label>
+      <label><input type="radio" name="q3-1" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">2. Le taux de marque se calcule par rapport à :</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q3-2" value="a"> Le coût d'achat HT</label>
+      <label><input type="radio" name="q3-2" value="b"> Le prix de vente HT</label>
+      <label><input type="radio" name="q3-2" value="c"> Le prix de vente TTC</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">3. Pour un même produit, le taux de marge est toujours inférieur au taux de marque.</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q3-3" value="V"> Vrai</label>
+      <label><input type="radio" name="q3-3" value="F"> Faux</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">4. Dans l'exemple du LEGO Star Wars, quelle enseigne est la plus avantageuse pour le CLIENT (prix net le plus bas) ?</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q3-4" value="a"> La Grande Récré</label>
+      <label><input type="radio" name="q3-4" value="b"> JouéClub</label>
+      <label><input type="radio" name="q3-4" value="c"> Leclerc</label>
+    </div>
+  </div>
+  <div class="quiz-card">
+    <div class="quiz-q">5. Dans ce même exemple, quelle enseigne garde la marge réelle la plus élevée pour ELLE-MÊME ?</div>
+    <div class="quiz-opts">
+      <label><input type="radio" name="q3-5" value="a"> La Grande Récré</label>
+      <label><input type="radio" name="q3-5" value="b"> JouéClub</label>
+      <label><input type="radio" name="q3-5" value="c"> Leclerc</label>
+    </div>
+  </div>
+  <button class="verify-btn" onclick="verifyQuiz('m3', {'q3-1':'F','q3-2':'b','q3-3':'F','q3-4':'c','q3-5':'a'})">Vérifier mon quiz</button>
+  <div class="quiz-score" id="quiz-score-m3"></div>
+
+  <div class="box context" id="m3-status" style="margin-top:20px;">
+    <span class="btitle">Progression</span>
+    <p id="m3-status-text">Calculez votre CA prévisionnel, complétez l'Annexe 3, rédigez une conclusion et réussissez le quiz de révision (5/5) pour déverrouiller la Synthèse.</p>
+  </div>
+</section>
+
+<!-- ============ SYNTHÈSE ============ -->
+<section class="mission" id="m4">
+  <h2 class="mtitle">Synthèse <button class="print-btn" onclick="printMission('m4')">🖨️ Imprimer la synthèse</button></h2>
+
+  <h3 class="stitle">1. Situer le point de vente sur son marché</h3>
+  <div class="box task" id="box-syn1">
+    <p>Le marché est constitué de deux grands ensembles qui se rencontrent : <input class="blank" size="12"> et <input class="blank" size="12">.</p>
+    <p>Les 4 principaux types d'acteurs : <input class="blank" size="10"> / <input class="blank" size="10"> / <input class="blank" size="10"> / <input class="blank" size="10"></p>
+  </div>
+
+  <h3 class="stitle">2. Déterminer la zone de chalandise</h3>
+  <div class="box rappel">
+    <p>Les zones isométriques sont réalisées sur la base d'une distance métrique, alors que les zones isochrones sont élaborées en fonction du temps de trajet nécessaire pour rejoindre le point de vente.</p>
+  </div>
+  <div class="box task">
+    <p>Les 3 zones, de la plus proche à la plus éloignée : <input class="blank" size="10"> / <input class="blank" size="10"> / <input class="blank" size="10"></p>
+  </div>
+
+  <h3 class="stitle">3. Calculer le chiffre d'affaires prévisionnel</h3>
+  <div class="box task">
+    <p><strong>Montant des dépenses commercialisables de la zone</strong></p>
+    <p>− <input class="blank" size="20"> (dépenses réalisées à l'extérieur de la zone)</p>
+    <p>+ <input class="blank" size="20"> (dépenses réalisées par des clients extérieurs)</p>
+    <p>− Part des dépenses captées par les concurrents de la zone</p>
+    <p><strong>= CA prévisionnel</strong></p>
+  </div>
+
+  <h3 class="stitle">Mots-clés du chapitre</h3>
+  <div class="box doc">
+    <p>Expliquez avec vos mots, chacun en une phrase :</p>
+    <ul>
+      <li>Cœur de cible</li>
+      <li>Leader</li>
+      <li>Challenger</li>
+      <li>Part de marché</li>
+      <li>Comportement d'achat</li>
+    </ul>
+  </div>
+
+  <footer class="note">
+    Document réalisé pour un usage pédagogique en Première Bac Pro MCV, structuré sur le modèle du dossier Nathan « Connaître le marché et déterminer la zone de chalandise ». Les chiffres réels du marché du jouet et la situation de La Grande Récré/JouéClub sont sourcés à la date de rédaction. Les données propres au magasin de Vire (CA, taux d'évasion/attraction) sont fictives et construites pour l'exercice. Les temps de trajet ne sont pas préremplis : ils doivent être vérifiés par l'élève sur un outil de cartographie réel.
+  </footer>
+</section>
+
+<!-- ============ JEU DE PAIRES ============ -->
+<section class="mission" id="m5">
+  <h2 class="mtitle">🧩 Jeu de paires — Le vocabulaire du chapitre</h2>
+  <div class="box context">
+    <span class="btitle">Comment jouer</span>
+    <p>Choisissez un thème ci-dessous (correspondant à une séance de cours), puis cliquez un terme et sa définition pour former une paire. Bonne paire = vert et verrouillée. Mauvaise paire = rouge, puis les deux se libèrent.</p>
+  </div>
+
+  <div class="round-menu" id="round-menu"></div>
+
+  <div class="game-hud">
+    <div class="stat">Paires trouvées : <span id="g-found">0</span> / <span id="g-total">0</span></div>
+    <div class="stat">Essais : <span id="g-tries">0</span></div>
+    <div class="stat">Temps : <span id="g-timer">0:00</span></div>
+  </div>
+
+  <div class="game-board">
+    <div><h3 class="stitle" style="margin-top:0;">Termes</h3><div id="g-terms"></div></div>
+    <div><h3 class="stitle" style="margin-top:0;">Définitions</h3><div id="g-defs"></div></div>
+  </div>
+
+  <div class="game-win" id="g-win">
+    <h3 style="color:var(--green);margin:0 0 8px;">🎉 Bravo, toutes les paires sont trouvées !</h3>
+    <p id="g-winStats" style="font-family:Arial,Helvetica,sans-serif;"></p>
+  </div>
+</section>
+
+</div>
+
+<script>
+const GAME_ROUNDS = {
+  "s1": { label: "Séance 1 — Veille & marché", desc: "8 paires", pairs: [
+    ["Veille commerciale", "Surveiller et analyser en continu son marché"],
+    ["Fiable", "Information vérifiable, avec une source connue"],
+    ["Marché", "Lieu de rencontre entre une offre et une demande"],
+    ["Producteur", "Fabrique le produit"],
+    ["Distributeur", "Vend le produit au client final"],
+    ["Prescripteur", "Oriente l'achat sans vendre ni acheter"],
+    ["Concurrent", "Vend, capte la même clientèle"],
+    ["Régulateur", "Contrôle, protège le client, sans acheter ni vendre"],
+  ]},
+  "s2": { label: "Séance 2 — Ménage, concurrence, commerce", desc: "8 paires", pairs: [
+    ["Ménage", "Unité économique de consommation qui partage un même budget"],
+    ["Concurrence directe", "Même métier, mêmes clients"],
+    ["Concurrence indirecte", "Vend aussi, mais ce n'est pas son métier principal"],
+    ["Commerce indépendant isolé", "Le commerçant décide seul de tout, sans réseau"],
+    ["Commerce associé", "Commerçants indépendants réunis en coopérative"],
+    ["Commerce intégré", "Tous les magasins appartiennent à la même entreprise"],
+    ["Franchise", "Contrat avec droit d'entrée et redevances"],
+    ["Marge commerciale", "Prix de vente HT − Coût d'achat HT"],
+  ]},
+  "s3": { label: "Séance 3 — PESTEL", desc: "6 paires", pairs: [
+    ["Politique", "Décisions des pouvoirs publics, subventions, taxes"],
+    ["Économique", "Pouvoir d'achat, inflation, conjoncture"],
+    ["Sociologique", "Modes de vie, tendances de consommation"],
+    ["Technologique", "Innovations, digitalisation"],
+    ["Écologique", "Enjeux environnementaux, développement durable"],
+    ["Légal", "Lois, normes, obligations juridiques"],
+  ]},
+  "s4": { label: "Séance 4 — Positions & circuits", desc: "7 paires", pairs: [
+    ["Leader", "Domine le marché, le fait évoluer sans le bousculer"],
+    ["Challenger", "Bouscule les règles pour prendre la première place"],
+    ["Suiveur", "Suit le leader sans jamais innover"],
+    ["Spécialiste", "Se concentre sur une niche de clientèle"],
+    ["Circuit direct", "Aucun intermédiaire entre producteur et client"],
+    ["Circuit court", "Un seul intermédiaire"],
+    ["Circuit long", "Plusieurs intermédiaires"],
+  ]},
+  "s5": { label: "Séance 5 — Zone de chalandise", desc: "8 paires", pairs: [
+    ["Zone primaire", "Zone d'attractivité la plus forte, la plus proche"],
+    ["Zone secondaire", "Zone d'attractivité moyenne"],
+    ["Zone tertiaire", "Zone d'attractivité la plus faible, la plus éloignée"],
+    ["Courbe isométrique", "Tracée à distance égale"],
+    ["Courbe isochrone", "Tracée à durée de trajet égale"],
+    ["Évasion commerciale", "Dépenses qui s'échappent hors de la zone"],
+    ["Attraction commerciale", "Dépenses de clients venus de l'extérieur"],
+    ["Taux de couverture", "% de ménages ciblés pour une action marketing"],
+  ]},
+  "s6": { label: "Outils de mesure (bilan + TP)", desc: "6 paires", pairs: [
+    ["Part de marché", "Poids d'une entreprise sur son marché, en %"],
+    ["Taux de marque", "Marge ÷ Prix de vente HT × 100"],
+    ["Taux de marge", "Marge ÷ Coût d'achat HT × 100"],
+    ["Coefficient multiplicateur", "Prix de vente TTC ÷ Coût d'achat HT"],
+    ["Cœur de cible", "Segment de clientèle prioritaire"],
+    ["Comportement d'achat", "Façon dont un client choisit et achète un produit"],
+  ]},
+};
+
+let gFound=0, gTries=0, gSeconds=0, gTimerInt=null, gStarted=false;
+let gSelTerm=null, gSelDef=null, gCurrentRound=null;
+
+function gShuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function buildRoundMenu(){
+  const menu = document.getElementById('round-menu');
+  menu.innerHTML = '';
+  Object.entries(GAME_ROUNDS).forEach(([key, r])=>{
+    const btn = document.createElement('div');
+    btn.className = 'round-btn';
+    btn.id = 'roundbtn-'+key;
+    btn.innerHTML = `<span class="rt">${r.label}</span><span class="rc">${r.desc}</span>`;
+    btn.onclick = ()=>startRound(key);
+    menu.appendChild(btn);
+  });
+}
+
+function startRound(key){
+  gCurrentRound = key;
+  document.querySelectorAll('.round-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('roundbtn-'+key).classList.add('active');
+  const PAIRS = GAME_ROUNDS[key].pairs;
+  gFound=0; gTries=0; gSeconds=0; gStarted=false; gSelTerm=null; gSelDef=null;
+  clearInterval(gTimerInt);
+  document.getElementById('g-found').textContent = 0;
+  document.getElementById('g-total').textContent = PAIRS.length;
+  document.getElementById('g-tries').textContent = 0;
+  document.getElementById('g-timer').textContent = "0:00";
+  document.getElementById('g-win').classList.remove('show');
+
+  const termsShuffled = gShuffle(PAIRS.map((p,i)=>({text:p[0], idx:i})));
+  const defsShuffled = gShuffle(PAIRS.map((p,i)=>({text:p[1], idx:i})));
+  const termsEl = document.getElementById('g-terms');
+  const defsEl = document.getElementById('g-defs');
+  termsEl.innerHTML=''; defsEl.innerHTML='';
+
+  termsShuffled.forEach(t=>{
+    const div=document.createElement('div');
+    div.className='game-card term'; div.textContent=t.text; div.dataset.idx=t.idx;
+    div.onclick=()=>gSelectTerm(div);
+    termsEl.appendChild(div);
+  });
+  defsShuffled.forEach(d=>{
+    const div=document.createElement('div');
+    div.className='game-card'; div.textContent=d.text; div.dataset.idx=d.idx;
+    div.onclick=()=>gSelectDef(div);
+    defsEl.appendChild(div);
+  });
+}
+
+function gStartTimer(){
+  if(gStarted) return;
+  gStarted = true;
+  gTimerInt = setInterval(()=>{
+    gSeconds++;
+    const m=Math.floor(gSeconds/60), s=gSeconds%60;
+    document.getElementById('g-timer').textContent = m+":"+String(s).padStart(2,'0');
+  }, 1000);
+}
+
+function gSelectTerm(el){
+  if(el.classList.contains('matched')) return;
+  gStartTimer();
+  if(gSelTerm) gSelTerm.classList.remove('selected');
+  gSelTerm = el; el.classList.add('selected');
+  gTryMatch();
+}
+function gSelectDef(el){
+  if(el.classList.contains('matched')) return;
+  gStartTimer();
+  if(gSelDef) gSelDef.classList.remove('selected');
+  gSelDef = el; el.classList.add('selected');
+  gTryMatch();
+}
+function gTryMatch(){
+  if(!gSelTerm || !gSelDef) return;
+  gTries++;
+  document.getElementById('g-tries').textContent = gTries;
+  const total = GAME_ROUNDS[gCurrentRound].pairs.length;
+  if(gSelTerm.dataset.idx === gSelDef.dataset.idx){
+    gSelTerm.classList.remove('selected'); gSelTerm.classList.add('matched');
+    gSelDef.classList.remove('selected'); gSelDef.classList.add('matched');
+    gFound++;
+    document.getElementById('g-found').textContent = gFound;
+    gSelTerm=null; gSelDef=null;
+    if(gFound === total){
+      clearInterval(gTimerInt);
+      const m=Math.floor(gSeconds/60), s=gSeconds%60;
+      document.getElementById('g-winStats').textContent = `Temps : ${m}:${String(s).padStart(2,'0')} — Essais : ${gTries} (minimum possible : ${total})`;
+      document.getElementById('g-win').classList.add('show');
+    }
+  } else {
+    const t=gSelTerm, d=gSelDef;
+    t.classList.add('wrong'); d.classList.add('wrong');
+    setTimeout(()=>{ t.classList.remove('selected','wrong'); d.classList.remove('selected','wrong'); }, 500);
+    gSelTerm=null; gSelDef=null;
+  }
+}
+
+buildRoundMenu();
+</script>
+
+<script>
+// ---------- Quiz de révision (generic) ----------
+let m1_quizok = false, m2_quizok = false, m3_quizok = false;
+function verifyQuiz(missionId, correctAnswers){
+  let score = 0;
+  const total = Object.keys(correctAnswers).length;
+  Object.entries(correctAnswers).forEach(([name, correct])=>{
+    const radios = document.getElementsByName(name);
+    let picked = null;
+    radios.forEach(r=>{ if(r.checked) picked = r.value; r.closest('label') && r.closest('label').classList.remove('ok','bad'); });
+    radios.forEach(r=>{
+      const label = r.closest('label');
+      if(picked === correct && r.value === correct){ label.classList.add('ok'); }
+      else if(picked !== correct && r.checked){ label.classList.add('bad'); }
+    });
+    if(picked === correct) score++;
+  });
+  const scoreEl = document.getElementById('quiz-score-'+missionId);
+  scoreEl.classList.add('show');
+  const passed = score === total;
+  scoreEl.className = 'quiz-score show ' + (passed ? 'allok' : 'someerr');
+  scoreEl.style.background = passed ? '#E4F3E6' : '#FBE9E1';
+  scoreEl.style.color = passed ? 'var(--green)' : 'var(--coral)';
+  scoreEl.textContent = `Score : ${score}/${total}` + (passed ? " — Quiz réussi !" : " — Il faut 5/5 pour valider, réessayez les questions en rouge.");
+  if(missionId==='m1') m1_quizok = passed;
+  if(missionId==='m2') m2_quizok = passed;
+  if(missionId==='m3') m3_quizok = passed;
+  if(missionId==='m1') updateMission1Status();
+  if(missionId==='m2') updateMission2Status();
+  if(missionId==='m3') checkM3Done();
+}
+
+// ---------- State ----------
+let mission1Passed = false;
+let mission2Passed = false;
+let mission3Passed = false;
+let m1_d1ok=false, m1_d3ok=false, m1_annexeok=false;
+let m2_d2ok=false, m2_zonesok=false;
+
+// ---------- Tab navigation ----------
+function goTo(id){
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mission').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.classList.contains('locked')){
+      alert("Cette mission est verrouillée : terminez et validez la mission précédente d'abord.");
+      return;
+    }
+    goTo(btn.dataset.target);
+  });
+});
+
+// ---------- Normalize for grading (accent/case/space insensitive) ----------
+function norm(s){
+  return (s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+// ---------- Generic fill-in-blank checker ----------
+function checkBlanks(boxId, expected){
+  const box = document.getElementById(boxId);
+  const inputs = box.querySelectorAll('input.blank');
+  let allOk = true;
+  inputs.forEach((inp, i)=>{
+    if(norm(inp.value) === norm(expected[i])){
+      inp.classList.add('ok'); inp.classList.remove('bad');
+    } else {
+      inp.classList.add('bad'); inp.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-'+boxId);
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Correct !" : "Une ou plusieurs réponses sont incorrectes (en rouge). Réessayez.";
+
+  if(boxId==='box-d1') m1_d1ok = allOk;
+  if(boxId==='box-d3') m1_d3ok = allOk;
+  if(boxId==='box-d2') m2_d2ok = allOk;
+  updateMission1Status();
+  updateMission2Status();
+}
+
+// ---------- Mission 1 Annexe 1 ----------
+function verifyAnnexe1(){
+  const table = document.getElementById('tbl-annexe1');
+  const inputs = table.querySelectorAll('input[data-correct]');
+  let allOk = true;
+  inputs.forEach(inp=>{
+    const correct = parseFloat(inp.dataset.correct);
+    const val = parseFloat(inp.value.replace(',','.').replace('%','').trim());
+    if(!isNaN(val) && Math.abs(val-correct) <= 0.6){
+      inp.classList.add('ok'); inp.classList.remove('bad');
+    } else {
+      inp.classList.add('bad'); inp.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-annexe1');
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Tous vos calculs sont corrects !" : "Certaines cases sont en rouge : revérifiez la formule pour ces lignes.";
+  m1_annexeok = allOk;
+  updateMission1Status();
+}
+
+function updateMission1Status(){
+  mission1Passed = m1_d1ok && m1_d3ok && m1_annexeok && m1_quizok;
+  const el = document.getElementById('m1-status-text');
+  if(mission1Passed){
+    el.textContent = "✓ Mission 1 validée. La Mission 2 est déverrouillée.";
+    document.getElementById('m1-status').style.borderLeftColor = 'var(--green)';
+    unlockTab('m2');
+  } else {
+    const missing = [];
+    if(!m1_d1ok) missing.push("Document 1");
+    if(!m1_d3ok) missing.push("Document 3");
+    if(!m1_annexeok) missing.push("Annexe 1");
+    if(!m1_quizok) missing.push("Quiz de révision (5/5)");
+    el.textContent = "Encore à valider : " + missing.join(", ") + ".";
+  }
+}
+
+// ---------- Mission 2 : zones ----------
+function verifyZones(){
+  const rows = document.querySelectorAll('#tbl-zones tbody tr');
+  let allOk = true;
+  rows.forEach(r=>{
+    const sel = r.querySelector('select');
+    const correct = r.dataset.correct;
+    if(sel.value === correct){
+      sel.classList.add('ok'); sel.classList.remove('bad');
+    } else {
+      sel.classList.add('bad'); sel.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-zones');
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Toutes les zones sont correctes !" : "Certaines communes sont mal classées (en rouge). Revérifiez leur temps de trajet réel.";
+  m2_zonesok = allOk;
+  if(allOk) computeZoneSummary();
+  updateMission2Status();
+}
+
+function computeZoneSummary(){
+  const rows = document.querySelectorAll('#tbl-zones tbody tr');
+  let pop = {P:0,S:0,T:0};
+  rows.forEach(r=>{
+    const p = parseInt(r.dataset.pop,10);
+    const z = r.querySelector('select').value;
+    if(pop[z] !== undefined) pop[z]+=p;
+  });
+  document.getElementById('pop-P').textContent = pop.P.toLocaleString('fr-FR');
+  document.getElementById('pop-S').textContent = pop.S.toLocaleString('fr-FR');
+  document.getElementById('pop-T').textContent = pop.T.toLocaleString('fr-FR');
+
+  let totPop=0;
+  ['P','S','T'].forEach(z=>{
+    document.getElementById('disp-pop-'+z).textContent = pop[z].toLocaleString('fr-FR');
+    totPop+=pop[z];
+  });
+  document.getElementById('disp-pop-tot').textContent = totPop.toLocaleString('fr-FR');
+
+  window._zonePop = pop; // stash for Mission 2 Annexe 2 verification + Mission 3
+}
+
+// ---------- Mission 2 Annexe 2 : ménages et prospectus (calcul élève, vérifié) ----------
+let m2_annexe2ok = false;
+function verifyAnnexe2(){
+  if(!window._zonePop){
+    alert("Validez d'abord vos zones ci-dessus (« Vérifier mes zones »).");
+    return;
+  }
+  const pop = window._zonePop;
+  const couverture = {P:0.90, S:0.75, T:0.60};
+  let allOk = true;
+  let totMenCorrect=0, totProCorrect=0;
+  ['P','S','T'].forEach(z=>{
+    const menCorrect = Math.round(pop[z]/2.24);
+    const proCorrect = Math.round(menCorrect*couverture[z]);
+    totMenCorrect+=menCorrect; totProCorrect+=proCorrect;
+    [['a2-men-'+z, menCorrect], ['a2-pro-'+z, proCorrect]].forEach(([id, correct])=>{
+      const inp = document.getElementById(id);
+      const val = parseFloat(inp.value.replace(/\s/g,'').replace(',','.'));
+      if(!isNaN(val) && Math.abs(val-correct) <= Math.max(2, correct*0.02)){
+        inp.classList.add('ok'); inp.classList.remove('bad');
+      } else {
+        inp.classList.add('bad'); inp.classList.remove('ok');
+        allOk = false;
+      }
+    });
+  });
+  [['a2-men-tot', totMenCorrect], ['a2-pro-tot', totProCorrect]].forEach(([id, correct])=>{
+    const inp = document.getElementById(id);
+    const val = parseFloat(inp.value.replace(/\s/g,'').replace(',','.'));
+    if(!isNaN(val) && Math.abs(val-correct) <= Math.max(3, correct*0.02)){
+      inp.classList.add('ok'); inp.classList.remove('bad');
+    } else {
+      inp.classList.add('bad'); inp.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-annexe2');
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Tous vos calculs sont corrects !" : "Certaines cases sont en rouge : revérifiez la formule (ménages = population ÷ 2,24 ; prospectus = ménages × taux de couverture).";
+  m2_annexe2ok = allOk;
+  updateMission2Status();
+}
+
+function updateMission2Status(){
+  mission2Passed = m2_d2ok && m2_zonesok && m2_annexe2ok && m2_quizok;
+  const el = document.getElementById('m2-status-text');
+  if(mission2Passed){
+    el.textContent = "✓ Mission 2 validée. La Mission 3 est déverrouillée.";
+    document.getElementById('m2-status').style.borderLeftColor = 'var(--green)';
+    unlockTab('m3');
+  } else {
+    const missing = [];
+    if(!m2_d2ok) missing.push("Document 2 (texte à trous)");
+    if(!m2_zonesok) missing.push("classement des 16 communes");
+    if(!m2_annexe2ok) missing.push("Annexe 2 (ménages et prospectus)");
+    if(!m2_quizok) missing.push("Quiz de révision (5/5)");
+    el.textContent = "Encore à valider : " + missing.join(", ") + ".";
+  }
+}
+
+// ---------- Mission 3 Annexe 3 (taux de marque/marge) ----------
+let m3_annexe3ok = false;
+function verifyAnnexe3(){
+  const table = document.getElementById('tbl-annexe3');
+  const inputs = table.querySelectorAll('input[data-correct]');
+  let allOk = true;
+  inputs.forEach(inp=>{
+    const correct = parseFloat(inp.dataset.correct);
+    const val = parseFloat(inp.value.replace(',','.').replace('%','').replace('€','').trim());
+    if(!isNaN(val) && Math.abs(val-correct) <= 0.6){
+      inp.classList.add('ok'); inp.classList.remove('bad');
+    } else {
+      inp.classList.add('bad'); inp.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-annexe3');
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Tous vos calculs sont corrects !" : "Certaines cases sont en rouge : revérifiez la formule pour ces produits.";
+  m3_annexe3ok = allOk;
+  checkM3Done();
+}
+
+// ---------- Mission 3 ----------
+function recalcEvasion(){
+  if(!window._zonePop){
+    alert("Retournez d'abord en Mission 2 et validez vos zones (« Vérifier mes zones »).");
+    return;
+  }
+  const tauxEvasion = {P:0.15, S:0.22, T:0.30};
+  const pop = window._zonePop;
+  let totMenages=0, totApresEvasion=0;
+  ['P','S','T'].forEach(z=>{
+    const men = Math.round(pop[z]/2.24);
+    const apres = Math.round(men*(1-tauxEvasion[z]));
+    document.getElementById('ev-men-'+z).textContent = men.toLocaleString('fr-FR');
+    document.getElementById('ev-res-'+z).textContent = apres.toLocaleString('fr-FR');
+    totMenages+=men; totApresEvasion+=apres;
+  });
+  document.getElementById('ev-men-tot').textContent = totMenages.toLocaleString('fr-FR');
+  document.getElementById('ev-res-tot').textContent = totApresEvasion.toLocaleString('fr-FR');
+
+  const apresAttraction = totApresEvasion + 898;
+  const depenses = apresAttraction * 220;
+  const concurrence = depenses * 0.78;
+  const caPrev = depenses - concurrence;
+
+  document.getElementById('ca-1').textContent = totApresEvasion.toLocaleString('fr-FR');
+  document.getElementById('ca-2').textContent = apresAttraction.toLocaleString('fr-FR');
+  document.getElementById('ca-3').textContent = Math.round(depenses).toLocaleString('fr-FR')+' €';
+  document.getElementById('ca-4').textContent = Math.round(concurrence).toLocaleString('fr-FR')+' €';
+  document.getElementById('ca-5').textContent = Math.round(caPrev).toLocaleString('fr-FR')+' €';
+  window._m3calc = true;
+  checkM3Done();
+}
+
+function checkM3Done(){
+  const concl = document.getElementById('m3-conclusion').value.trim();
+  mission3Passed = !!window._m3calc && concl.length > 15 && m3_annexe3ok && m3_quizok;
+  const el = document.getElementById('m3-status-text');
+  if(mission3Passed){
+    el.textContent = "✓ Mission 3 validée. La Synthèse est déverrouillée.";
+    document.getElementById('m3-status').style.borderLeftColor = 'var(--green)';
+    unlockTab('m4');
+  } else {
+    const missing = [];
+    if(!window._m3calc) missing.push("calcul du CA prévisionnel");
+    if(concl.length <= 15) missing.push("conclusion (au moins quelques phrases)");
+    if(!m3_annexe3ok) missing.push("Annexe 3 (taux de marque/marge)");
+    if(!m3_quizok) missing.push("Quiz de révision (5/5)");
+    el.textContent = "Encore à faire : " + missing.join(", ") + ".";
+  }
+}
+
+// ---------- Unlock helper ----------
+function unlockTab(id){
+  const tab = document.getElementById('tab-'+id);
+  tab.classList.remove('locked');
+}
+
+// ---------- Print ----------
+function printMission(id){
+  document.querySelectorAll('.mission').forEach(s=>s.classList.remove('printing'));
+  document.getElementById(id).classList.add('printing');
+  window.print();
+}
+</script>
+</body>
+</html>
