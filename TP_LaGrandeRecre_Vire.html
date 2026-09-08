@@ -26,6 +26,14 @@
   nav.tabs button.active{color:var(--navy);border-bottom-color:var(--accent);}
   nav.tabs button.locked{color:#c4c4c4;cursor:not-allowed;}
   nav.tabs button.locked::after{content:" 🔒";font-size:10px;}
+
+  .unlock-bar{background:#FBF3DE;border-bottom:1px solid #e8dcb0;}
+  .unlock-inner{display:flex;align-items:center;gap:10px;padding:8px 20px;flex-wrap:wrap;font-family:Arial,Helvetica,sans-serif;}
+  .unlock-label{font-size:12.5px;color:var(--gold);font-weight:700;}
+  .unlock-inner input{border:1px solid #d4c483;border-radius:5px;padding:6px 10px;font-size:13px;width:140px;font-family:Arial,Helvetica,sans-serif;}
+  .unlock-inner button{background:var(--gold);color:#fff;border:none;padding:6px 14px;border-radius:5px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .unlock-inner button:hover{background:#8a6a05;}
+  .unlock-inner #unlock-msg{font-size:12.5px;font-weight:700;}
   section.mission{display:none;padding-top:26px;}
   section.mission.active{display:block;}
   h2.mtitle{font-size:22px;color:var(--navy);border-bottom:2px solid var(--navy);padding-bottom:8px;margin:0 0 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -148,8 +156,19 @@
     <button class="tabbtn locked" data-target="m3" id="tab-m3">Mission 3</button>
     <button class="tabbtn locked" data-target="m4" id="tab-m4">Synthèse</button>
     <button class="tabbtn" data-target="m5" id="tab-m5">🧩 Jeu de paires</button>
+    <button class="tabbtn" data-target="m6" id="tab-m6">🎮 Mission Bonus</button>
+    <button class="tabbtn" data-target="m7" id="tab-m7">⚡ Défi chronométré</button>
   </div>
 </nav>
+
+<div class="unlock-bar">
+  <div class="wrap unlock-inner">
+    <span class="unlock-label">🔑 Vous avez déjà validé une mission précédente ? Demandez le code à votre professeur :</span>
+    <input type="text" id="unlock-code-input" placeholder="Code" onkeydown="if(event.key==='Enter') tryUnlockCode()">
+    <button onclick="tryUnlockCode()">Débloquer</button>
+    <span id="unlock-msg"></span>
+  </div>
+</div>
 
 <div class="wrap">
 
@@ -698,6 +717,116 @@
   </div>
 </section>
 
+<!-- ============ MISSION BONUS ============ -->
+<section class="mission" id="m6">
+  <h2 class="mtitle">🎮 Mission Bonus (pour ceux qui ont fini) — Le rayon jeux vidéo</h2>
+
+  <div class="box context">
+    <span class="btitle">Contexte professionnel</span>
+    <p><em>« Vous avez fini en avance ? Parfait, j'ai un nouveau dossier pour vous : la direction envisage d'ouvrir un rayon jeux vidéo dans notre magasin de Vire. Refaites le même travail que dans les Missions 1 et 3, mais sur ce nouveau marché. »</em></p>
+  </div>
+
+  <h3 class="stitle">Document 1 — Le marché français du jeu vidéo</h3>
+  <div class="box doc">
+    <span class="btitle">Chiffres réels 2025 (source SELL — Syndicat des éditeurs de logiciels de loisirs)</span>
+    <p>Le marché français du jeu vidéo a atteint <strong>5,856 milliards d'euros</strong> de chiffre d'affaires en 2025, en progression de <strong>2,9 %</strong> par rapport à 2024 — la 2ᵉ meilleure performance historique du secteur, juste derrière le record de 6,1 milliards de 2023.</p>
+    <p>Le marché se répartit en 3 écosystèmes : les <strong>consoles</strong> restent le premier segment avec 44 % du marché (2,552 milliards €), portées par le lancement de la Nintendo Switch 2 qui a fait progresser le segment de 14 % ; le <strong>mobile</strong> pèse 30 % (1,792 milliard €, +11 %) ; le <strong>PC gaming</strong> représente 26 % (1,512 milliard €, stable).</p>
+  </div>
+
+  <h3 class="stitle">Document 2 — Les concurrents sur le jeu vidéo à Vire</h3>
+  <div class="box task">
+    <span class="btitle">Identifiez et qualifiez la position de chaque concurrent</span>
+    <p>Micromania-Zing (déjà cité en Mission 1 comme concurrent en zone élargie), la Fnac, Cultura (rayon jeux vidéo en développement), et les plateformes de téléchargement (Steam, PlayStation Store, eShop Nintendo).</p>
+    <textarea class="open" placeholder="Ex. : Micromania-Zing = spécialiste, car..."></textarea>
+  </div>
+
+  <h3 class="stitle">Document 3 — Texte à trous (rappel : les 4 positions)</h3>
+  <div class="box rappel" id="box-d6">
+    <p>Le <input class="blank" id="d6b1" size="8"> domine le marché et évite de le bousculer.</p>
+    <p>Le <input class="blank" id="d6b2" size="10"> bouscule les règles pour tenter de prendre la première place.</p>
+    <p>Le <input class="blank" id="d6b3" size="10"> se concentre sur une niche de clientèle très précise.</p>
+    <button class="verify-btn" onclick="checkBlanks('box-d6', ['leader','challenger','specialiste'])">Vérifier</button>
+    <div class="feedback" id="fb-box-d6"></div>
+  </div>
+
+  <h3 class="stitle">Annexe — 💻 Prix et marges du rayon jeux vidéo (Excel)</h3>
+  <div class="box digital">Pour chacun des 4 produits, calculez le prix de vente HT, la TVA (20 %), le prix de vente TTC, le taux de marque et le taux de marge.</div>
+  <table class="calc" id="tbl-bonus">
+    <thead><tr><th>Produit</th><th>Coût HT</th><th>Marge</th><th>PV HT</th><th>TVA</th><th>PV TTC</th><th>Taux marque</th><th>Taux marge</th></tr></thead>
+    <tbody>
+      <tr><td>Console Nintendo Switch 2</td><td>320 €</td><td>30 €</td>
+        <td><input type="text" id="b-pvht-1" data-correct="350"></td>
+        <td><input type="text" id="b-tva-1" data-correct="70"></td>
+        <td><input type="text" id="b-pvttc-1" data-correct="420"></td>
+        <td><input type="text" id="b-tm-1" data-correct="8.57"></td>
+        <td><input type="text" id="b-tmg-1" data-correct="9.38"></td></tr>
+      <tr><td>Jeu vidéo AAA (nouveauté)</td><td>45 €</td><td>15 €</td>
+        <td><input type="text" id="b-pvht-2" data-correct="60"></td>
+        <td><input type="text" id="b-tva-2" data-correct="12"></td>
+        <td><input type="text" id="b-pvttc-2" data-correct="72"></td>
+        <td><input type="text" id="b-tm-2" data-correct="25"></td>
+        <td><input type="text" id="b-tmg-2" data-correct="33.33"></td></tr>
+      <tr><td>Manette sans fil</td><td>25 €</td><td>15 €</td>
+        <td><input type="text" id="b-pvht-3" data-correct="40"></td>
+        <td><input type="text" id="b-tva-3" data-correct="8"></td>
+        <td><input type="text" id="b-pvttc-3" data-correct="48"></td>
+        <td><input type="text" id="b-tm-3" data-correct="37.5"></td>
+        <td><input type="text" id="b-tmg-3" data-correct="60"></td></tr>
+      <tr><td>Casque gaming</td><td>30 €</td><td>20 €</td>
+        <td><input type="text" id="b-pvht-4" data-correct="50"></td>
+        <td><input type="text" id="b-tva-4" data-correct="10"></td>
+        <td><input type="text" id="b-pvttc-4" data-correct="60"></td>
+        <td><input type="text" id="b-tm-4" data-correct="40"></td>
+        <td><input type="text" id="b-tmg-4" data-correct="66.67"></td></tr>
+    </tbody>
+  </table>
+  <button class="verify-btn" onclick="verifyBonus()">Vérifier mes calculs</button>
+  <div class="feedback" id="fb-bonus"></div>
+
+  <div class="box task">
+    <span class="btitle">Analyse — la console fait-elle vraiment gagner de l'argent ?</span>
+    <p>Comparez le taux de marge de la console (≈ 9 %) à celui des autres produits (33 % à 67 %). Pourquoi un magasin accepte-t-il de vendre des consoles avec une marge aussi faible ? Qu'est-ce que ça implique pour la stratégie du rayon (sur quoi faut-il vraiment faire de la marge) ?</p>
+    <textarea class="open" placeholder="Votre analyse..."></textarea>
+  </div>
+
+  <div class="box context" style="margin-top:20px;">
+    <span class="btitle">Bravo</span>
+    <p>Vous avez terminé la Mission Bonus ! Vous pouvez maintenant tenter le Défi chronométré (onglet suivant) ou rejouer le Jeu de paires pour battre votre record.</p>
+  </div>
+</section>
+
+<!-- ============ DÉFI CHRONOMÉTRÉ ============ -->
+<section class="mission" id="m7">
+  <h2 class="mtitle">⚡ Défi chronométré — Le sais-tu vraiment ?</h2>
+  <div class="box context">
+    <span class="btitle">Comment ça marche</span>
+    <p>15 secondes par question, 4 réponses possibles. Plus vous répondez vite, plus vous marquez de points (jusqu'à 100 pts si vous répondez tout de suite, moins si vous traînez). Une mauvaise réponse ne rapporte rien. Choisissez un thème pour commencer.</p>
+  </div>
+
+  <div class="round-menu" id="defi-menu"></div>
+
+  <div id="defi-play" style="display:none;">
+    <div class="game-hud">
+      <div class="stat">Question <span id="dq-num">1</span> / <span id="dq-total">10</span></div>
+      <div class="stat">Score : <span id="dq-score">0</span></div>
+      <div class="stat">⏱️ <span id="dq-time">15</span>s</div>
+    </div>
+    <div style="height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:16px;">
+      <div id="dq-bar" style="height:100%;background:var(--accent);width:100%;transition:width 1s linear;"></div>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-q" id="dq-question" style="font-size:17px;"></div>
+      <div class="quiz-opts" id="dq-opts"></div>
+    </div>
+  </div>
+
+  <div class="game-win" id="dq-win">
+    <h3 style="color:var(--green);margin:0 0 8px;">🏆 Défi terminé !</h3>
+    <p id="dq-winStats" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;"></p>
+    <button class="verify-btn" onclick="document.getElementById('defi-menu').style.display='grid'; document.getElementById('dq-win').classList.remove('show');" style="margin-top:10px;">Rejouer un autre thème</button>
+  </div>
+</section>
+
 </div>
 
 <script>
@@ -864,6 +993,169 @@ function gTryMatch(){
 }
 
 buildRoundMenu();
+
+// ---------- Mission Bonus : verify ----------
+function verifyBonus(){
+  const table = document.getElementById('tbl-bonus');
+  const inputs = table.querySelectorAll('input[data-correct]');
+  let allOk = true;
+  inputs.forEach(inp=>{
+    const correct = parseFloat(inp.dataset.correct);
+    const val = parseFloat(inp.value.replace(',','.').replace('%','').replace('€','').trim());
+    if(!isNaN(val) && Math.abs(val-correct) <= Math.max(0.6, correct*0.02)){
+      inp.classList.add('ok'); inp.classList.remove('bad');
+    } else {
+      inp.classList.add('bad'); inp.classList.remove('ok');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-bonus');
+  fb.classList.add('show');
+  fb.className = allOk ? 'feedback show allok' : 'feedback show someerr';
+  fb.textContent = allOk ? "Tous vos calculs sont corrects, bravo !" : "Certaines cases sont en rouge : revérifiez la formule pour ces produits.";
+}
+
+// ---------- Défi chronométré ----------
+const DEFI_BANK = {
+  "d1": { label: "Marché & acteurs", desc: "10 questions", qs: [
+    ["Le marché est le lieu de rencontre entre une offre et une...", ["Demande","Marge","Zone","TVA"], 0],
+    ["Qui fabrique le produit ?", ["Le distributeur","Le producteur","Le régulateur","Le client"], 1],
+    ["Un acteur qui contrôle sans acheter ni vendre est un...", ["Concurrent","Régulateur","Prescripteur","Producteur"], 1],
+    ["Un ménage partage un même...", ["Local","Budget","Fournisseur","Concurrent"], 1],
+    ["Un concurrent qui vend le même produit aux mêmes clients est...", ["Indirect","Direct","Absent","Partiel"], 1],
+    ["La veille commerciale sert à...", ["Fixer les salaires","Surveiller le marché en continu","Payer les fournisseurs","Gérer les congés"], 1],
+    ["Une info fiable est une info...", ["Gratuite","Vérifiable avec une source connue","Rapide à trouver","Officielle uniquement"], 1],
+    ["L'offre regroupe...", ["Clients et ménages","Producteurs et distributeurs","Régulateurs","Concurrents"], 1],
+    ["Un influenceur qui recommande sans vendre est un...", ["Distributeur","Prescripteur","Concurrent","Client"], 1],
+    ["Le marché comprend l'offre, la demande et...", ["L'environnement","Le prix","Le stock","La TVA"], 0],
+  ]},
+  "d2": { label: "Formes de commerce & concurrence", desc: "8 questions", qs: [
+    ["Decathlon est un commerce...", ["Associé","Intégré","Indépendant isolé","Franchise"], 1],
+    ["Intersport est un commerce...", ["Intégré","Associé","Public","Isolé"], 1],
+    ["Sport 2000 fonctionne en...", ["Franchise","Intégré","Public","Coopérative simple"], 0],
+    ["Un commerce indépendant isolé décide...", ["Avec un réseau","Seul de tout","Avec un franchiseur","Rien"], 1],
+    ["Concurrence directe = même métier et...", ["Mêmes clients","Prix différents","Produits différents","Aucun lien"], 0],
+    ["Un contrat avec droit d'entrée et redevances = ...", ["Commerce associé","Franchise","Commerce intégré","Aucun contrat"], 1],
+    ["Une enseigne qui vend aussi le produit mais pas comme métier principal = concurrent...", ["Direct","Indirect","Absent","Total"], 1],
+    ["Dans un commerce associé, les commerçants sont...", ["Salariés","Indépendants réunis en coopérative","Actionnaires uniquement","Sans lien entre eux"], 1],
+  ]},
+  "d3": { label: "PESTEL & positions", desc: "8 questions", qs: [
+    ["PESTEL analyse...", ["La demande","L'environnement","Les stocks","Les salaires"], 1],
+    ["Le pouvoir d'achat relève du facteur...", ["Politique","Économique","Social","Légal"], 1],
+    ["Les modes de vie relèvent du facteur...", ["Sociologique","Légal","Technologique","Politique"], 0],
+    ["Les lois et normes relèvent du facteur...", ["Légal","Écologique","Social","Économique"], 0],
+    ["L'entreprise qui domine le marché est le...", ["Suiveur","Leader","Spécialiste","Challenger"], 1],
+    ["L'entreprise qui bouscule les règles pour prendre la 1ère place est le...", ["Leader","Challenger","Suiveur","Régulateur"], 1],
+    ["L'entreprise qui suit sans innover est le...", ["Challenger","Suiveur","Spécialiste","Leader"], 1],
+    ["L'entreprise concentrée sur une niche est le...", ["Suiveur","Spécialiste","Leader","Challenger"], 1],
+  ]},
+  "d4": { label: "Zone de chalandise", desc: "8 questions", qs: [
+    ["La zone la plus proche et la plus fidèle est la zone...", ["Tertiaire","Secondaire","Primaire","Externe"], 2],
+    ["La zone la plus éloignée est la zone...", ["Primaire","Secondaire","Tertiaire","Centrale"], 2],
+    ["Une courbe isométrique classique se base sur...", ["Le temps de trajet","La distance à vol d'oiseau","Le CA","La population"], 1],
+    ["Une courbe isochrone se base sur...", ["La distance","Le temps de trajet réel","Le CA","Le nombre de concurrents"], 1],
+    ["Le taux de couverture le plus élevé va à la zone...", ["Tertiaire","Secondaire","Primaire","Aucune"], 2],
+    ["L'évasion commerciale dans le CA prévisionnel est...", ["Ajoutée","Soustraite","Ignorée","Doublée"], 1],
+    ["L'attraction commerciale dans le CA prévisionnel est...", ["Soustraite","Ajoutée","Ignorée","Divisée"], 1],
+    ["La formule du CA prévisionnel a combien de termes ?", ["2","3","4","5"], 2],
+  ]},
+  "d5": { label: "Prix, marge, part de marché", desc: "8 questions", qs: [
+    ["La marge commerciale = PV HT −...", ["TVA","Coût d'achat HT","PV TTC","Coefficient"], 1],
+    ["Le taux de marque se calcule par rapport à...", ["Coût d'achat","PV HT","PV TTC","La marge seule"], 1],
+    ["Le taux de marge se calcule par rapport à...", ["PV HT","Coût d'achat HT","PV TTC","TVA"], 1],
+    ["Pour un même produit, le taux de marge est toujours...", ["Inférieur au taux de marque","Supérieur au taux de marque","Égal","Nul"], 1],
+    ["Le coefficient multiplicateur = PV TTC ÷ ...", ["Marge","Coût d'achat HT","TVA","PV HT"], 1],
+    ["La part de marché = CA de l'entreprise ÷ ...", ["Marge totale","CA total du marché","Coût d'achat total","Nombre de clients"], 1],
+    ["Le cœur de cible désigne...", ["Le siège social","Le segment de clientèle prioritaire","Le rayon le plus grand","Le prix le plus bas"], 1],
+    ["Un prix affiché élevé peut devenir avantageux pour le client grâce à...", ["Une hausse de TVA","Une carte de fidélité (cagnotte)","Une baisse du coût d'achat","Le taux de marge"], 1],
+  ]},
+};
+
+let dqQuestions=[], dqIndex=0, dqScore=0, dqTimer=null, dqTimeLeft=15, dqAnswered=false;
+
+function buildDefiMenu(){
+  const menu = document.getElementById('defi-menu');
+  menu.innerHTML = '';
+  Object.entries(DEFI_BANK).forEach(([key, r])=>{
+    const btn = document.createElement('div');
+    btn.className = 'round-btn';
+    btn.innerHTML = `<span class="rt">${r.label}</span><span class="rc">${r.desc}</span>`;
+    btn.onclick = ()=>startDefi(key);
+    menu.appendChild(btn);
+  });
+}
+
+function startDefi(key){
+  dqQuestions = gShuffle(DEFI_BANK[key].qs);
+  dqIndex = 0; dqScore = 0;
+  document.getElementById('defi-menu').style.display = 'none';
+  document.getElementById('dq-win').classList.remove('show');
+  document.getElementById('defi-play').style.display = 'block';
+  document.getElementById('dq-total').textContent = dqQuestions.length;
+  showDefiQuestion();
+}
+
+function showDefiQuestion(){
+  if(dqIndex >= dqQuestions.length){ endDefi(); return; }
+  dqAnswered = false;
+  dqTimeLeft = 15;
+  document.getElementById('dq-num').textContent = dqIndex+1;
+  document.getElementById('dq-score').textContent = dqScore;
+  document.getElementById('dq-time').textContent = dqTimeLeft;
+  document.getElementById('dq-bar').style.transition = 'none';
+  document.getElementById('dq-bar').style.width = '100%';
+  void document.getElementById('dq-bar').offsetWidth;
+  document.getElementById('dq-bar').style.transition = 'width 1s linear';
+
+  const [qtext, opts, correctIdx] = dqQuestions[dqIndex];
+  document.getElementById('dq-question').textContent = qtext;
+  const optsEl = document.getElementById('dq-opts');
+  optsEl.innerHTML = '';
+  const letters=['A','B','C','D'];
+  const shuffledIdx = gShuffle(opts.map((o,i)=>i));
+  shuffledIdx.forEach((origIdx, pos)=>{
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="dq-opt" style="display:none;"> ${letters[pos]}. ${opts[origIdx]}`;
+    label.onclick = ()=>answerDefi(origIdx===correctIdx, label);
+    optsEl.appendChild(label);
+  });
+
+  clearInterval(dqTimer);
+  setTimeout(()=>{ document.getElementById('dq-bar').style.width = '0%'; }, 30);
+  dqTimer = setInterval(()=>{
+    dqTimeLeft--;
+    document.getElementById('dq-time').textContent = Math.max(0,dqTimeLeft);
+    if(dqTimeLeft <= 0){
+      clearInterval(dqTimer);
+      if(!dqAnswered) answerDefi(false, null);
+    }
+  }, 1000);
+}
+
+function answerDefi(isCorrect, labelEl){
+  if(dqAnswered) return;
+  dqAnswered = true;
+  clearInterval(dqTimer);
+  document.querySelectorAll('#dq-opts label').forEach(l=>l.style.pointerEvents='none');
+  if(isCorrect){
+    const pts = Math.max(10, Math.round((dqTimeLeft/15)*100));
+    dqScore += pts;
+    if(labelEl) labelEl.classList.add('ok');
+  } else {
+    if(labelEl) labelEl.classList.add('bad');
+  }
+  document.getElementById('dq-score').textContent = dqScore;
+  setTimeout(()=>{ dqIndex++; showDefiQuestion(); }, 700);
+}
+
+function endDefi(){
+  document.getElementById('defi-play').style.display = 'none';
+  const maxScore = dqQuestions.length*100;
+  document.getElementById('dq-winStats').textContent = `Score final : ${dqScore} / ${maxScore} points sur ${dqQuestions.length} questions.`;
+  document.getElementById('dq-win').classList.add('show');
+}
+
+buildDefiMenu();
 </script>
 
 <script>
@@ -896,6 +1188,43 @@ function verifyQuiz(missionId, correctAnswers){
   if(missionId==='m1') updateMission1Status();
   if(missionId==='m2') updateMission2Status();
   if(missionId==='m3') checkM3Done();
+}
+
+// ---------- Code de déblocage professeur ----------
+function tryUnlockCode(){
+  const raw = document.getElementById('unlock-code-input').value.trim().toUpperCase();
+  const msg = document.getElementById('unlock-msg');
+
+  function passMission1(){
+    m1_d1ok=true; m1_d3ok=true; m1_annexeok=true; m1_quizok=true; mission1Passed=true;
+    unlockTab('m2');
+  }
+  function passMission2(){
+    m2_d2ok=true; m2_zonesok=true; m2_annexe2ok=true; m2_quizok=true; mission2Passed=true;
+    unlockTab('m3');
+    window._zonePop = {P:13862, S:2680, T:6367}; // valeurs correctes, pour que la Mission 3 calcule normalement
+  }
+  function passMission3(){
+    m3_annexe3ok=true; m3_quizok=true; window._m3calc=true; mission3Passed=true;
+    unlockTab('m4');
+  }
+
+  if(raw === 'MISSION2' || raw === 'M2'){
+    passMission1();
+    msg.textContent = "✓ Mission 2 débloquée !"; msg.style.color = 'var(--green)';
+    goTo('m2');
+  } else if(raw === 'MISSION3' || raw === 'M3'){
+    passMission1(); passMission2();
+    msg.textContent = "✓ Mission 3 débloquée !"; msg.style.color = 'var(--green)';
+    goTo('m3');
+  } else if(raw === 'SYNTHESE' || raw === 'M4'){
+    passMission1(); passMission2(); passMission3();
+    msg.textContent = "✓ Synthèse débloquée !"; msg.style.color = 'var(--green)';
+    goTo('m4');
+  } else {
+    msg.textContent = "Code invalide."; msg.style.color = 'var(--bad)';
+  }
+  setTimeout(()=>{ msg.textContent=''; }, 4000);
 }
 
 // ---------- State ----------
