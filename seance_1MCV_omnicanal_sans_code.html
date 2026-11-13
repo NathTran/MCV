@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parcours client omnicanal – 1re Bac Pro MCV</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:14px;background:#eef0f3;color:#1a1a2e}
+
+/* ===== LAYOUT ===== */
+.wrap{max-width:940px;margin:0 auto;padding:1rem}
+
+/* ===== HEADER ===== */
+.header{background:#1a1a2e;color:#fff;border-radius:12px;padding:1.1rem 1.5rem;margin-bottom:.875rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header h1{font-size:17px;font-weight:bold;margin-bottom:2px}
+.header .sub{font-size:12px;opacity:.65}
+.badge{background:#4a90e2;color:#fff;font-size:11px;font-weight:bold;padding:4px 12px;border-radius:20px;white-space:nowrap}
+
+/* ===== PROGRESSION ===== */
+.steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.625rem}
+.step{padding:4px 11px;border-radius:20px;border:1px solid #ccc;background:#fff;color:#888;font-size:11px;cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.step.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e;font-weight:bold}
+.step.done{background:#d4edda;color:#155724;border-color:#c3e6cb}
+.step.locked{background:#f5f5f5;color:#bbb;cursor:not-allowed}
+.step.locked::after{content:" 🔒";font-size:10px}
+.pbar{height:5px;background:#ddd;border-radius:3px;margin-bottom:1.1rem}
+.pfill{height:5px;background:#1a1a2e;border-radius:3px;transition:width .4s ease}
+
+/* ===== SECTIONS ===== */
+.sec{display:none}
+.sec.on{display:block}
+
+/* ===== CARDS ===== */
+.card{background:#fff;border:1px solid #dde0e6;border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem}
+.card.blue{border-left:4px solid #4a90e2;background:#f0f6ff}
+.card.yellow{border-left:4px solid #f5a623;background:#fffaf0}
+.card.green{border-left:4px solid #27ae60;background:#f0fff4}
+
+/* ===== SECTION HEADER ===== */
+.shd{display:flex;align-items:flex-start;gap:10px;margin-bottom:1rem;padding-bottom:.875rem;border-bottom:2px solid #f0f0f0}
+.snum{width:30px;height:30px;border-radius:50%;background:#1a1a2e;color:#fff;font-size:13px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.stit{font-size:16px;font-weight:bold;color:#1a1a2e}
+.ssub{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
+.dur{margin-left:auto;background:#f0f0f0;font-size:11px;color:#555;padding:3px 9px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+
+/* ===== LABELS ===== */
+.lbl{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:.875rem 0 .4rem}
+
+/* ===== QUESTION CARD ===== */
+.qcard{border:1px solid #e5e8ed;border-radius:8px;padding:.9rem 1rem;margin-bottom:.625rem;background:#fdfdfd}
+.qcard.error{border:2px solid #e74c3c!important;background:#fff8f8}
+.qnum{font-size:11px;font-weight:bold;color:#4a90e2;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.qtext{font-size:13px;line-height:1.65;color:#1a1a2e;margin-bottom:.5rem}
+.consigne{font-size:11px;color:#888;font-style:italic;margin-bottom:.5rem;padding:4px 8px;background:#f8f9fa;border-radius:4px;border-left:2px solid #ccc}
+
+/* ===== BOUTONS CHOIX ===== */
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.opts.has-error .opt:not(.sel){border-color:#e74c3c}
+.opt{font-size:12px;padding:6px 14px;border-radius:20px;border:1.5px solid #ccc;background:#fff;color:#333;cursor:pointer;transition:all .15s;font-weight:500}
+.opt:hover{border-color:#4a90e2;background:#f0f6ff}
+.opt.sel{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+
+/* ===== VRAI/FAUX ===== */
+.tf{display:flex;gap:8px;margin-top:6px}
+.tfb{flex:1;padding:8px;border-radius:8px;border:1.5px solid #ccc;background:#fff;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;text-align:center}
+.tfb:hover{border-color:#4a90e2;background:#f0f6ff}
+.tfb.sel{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.tf.has-error .tfb:not(.sel){border-color:#e74c3c}
+
+/* ===== CHAMPS TEXTE ===== */
+.field-wrap{margin-top:7px}
+.field-lbl{font-size:11px;font-weight:bold;color:#555;margin-bottom:3px}
+.field-hint{font-size:11px;color:#888;font-style:italic;margin-bottom:3px}
+input.field,textarea.field{width:100%;font-size:13px;padding:8px 11px;border-radius:7px;border:1.5px solid #d0d3d9;background:#fafbfc;color:#1a1a2e;font-family:Arial,sans-serif;outline:none;transition:border-color .2s}
+input.field:focus,textarea.field:focus{border-color:#4a90e2;background:#fff}
+input.field.error,textarea.field.error{border-color:#e74c3c!important;background:#fff5f5}
+textarea.field{min-height:52px;resize:vertical}
+
+/* ===== LIEN SITE ===== */
+.site-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:bold;color:#1a6bb5;background:#e8f4fd;padding:5px 12px;border-radius:6px;text-decoration:none;margin-bottom:.625rem;border:1px solid #b8d8f0}
+.site-link:hover{background:#cce5ff}
+
+/* ===== DEF GRILLE ===== */
+.def-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:.875rem}
+.def-card{border:1px solid #e0e0e0;border-radius:8px;padding:.875rem;background:#fff}
+.def-icon{font-size:22px;margin-bottom:7px}
+.def-lbl{font-size:13px;font-weight:bold;margin-bottom:5px;color:#1a1a2e}
+.def-body{font-size:12px;color:#555;line-height:1.65}
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.875rem}
+.tool-card{border:1px solid #e0e0e0;border-radius:8px;padding:.75rem;background:#fff}
+.tool-nm{font-size:12px;font-weight:bold;margin-bottom:3px;color:#1a1a2e}
+.tool-de{font-size:11px;color:#666;line-height:1.5}
+
+/* ===== DRAG & DROP TABLEAU ===== */
+.drag-pool{display:flex;flex-wrap:wrap;gap:6px;padding:12px;background:#f0f6ff;border:2px dashed #4a90e2;border-radius:10px;margin-bottom:.875rem;min-height:48px}
+.drag-pool-lbl{font-size:11px;font-weight:bold;color:#4a90e2;width:100%;margin-bottom:3px}
+.chip{font-size:11px;padding:5px 12px;border-radius:20px;background:#1a1a2e;color:#fff;border:none;cursor:grab;user-select:none;display:inline-block;transition:opacity .2s}
+.chip:hover{opacity:.85}
+.chip:active{cursor:grabbing;opacity:.6}
+.chip.placed{opacity:.2;pointer-events:none;background:#aaa}
+
+.jtable{width:100%;border-collapse:collapse;margin-top:.5rem}
+.jtable th{background:#1a1a2e;color:#fff;font-size:12px;padding:9px 8px;text-align:center;border:1px solid #2c2c4e}
+.jtable td{border:1px solid #d0d3d9;vertical-align:top;padding:0}
+.jtable .rowlbl{background:#f0f0f0;font-size:12px;font-weight:bold;color:#333;text-align:center;padding:8px 6px;width:90px;vertical-align:middle}
+.dzone{min-height:70px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;transition:background .15s}
+.dzone.over{background:#d4edff}
+.dzone .chip{font-size:10px;padding:3px 8px;cursor:default;background:#27ae60}
+
+/* ===== MODAL CODE ===== */
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,30,.6);z-index:999;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;max-width:400px;width:92%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h2{font-size:17px;font-weight:bold;color:#1a1a2e;margin-bottom:.5rem}
+.modal p{font-size:13px;color:#555;line-height:1.65;margin-bottom:1rem}
+#code-inp{width:100%;font-size:22px;text-align:center;letter-spacing:.35em;padding:10px;border-radius:8px;border:2px solid #ccc;outline:none;font-family:monospace;margin-bottom:.5rem;background:#fafbfc}
+#code-inp:focus{border-color:#4a90e2}
+.code-err{color:#e74c3c;font-size:12px;min-height:18px;margin-bottom:.625rem}
+.modal-nav{display:flex;gap:8px;justify-content:center}
+
+/* ===== ALERTE ===== */
+.alert{font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:.75rem;border-left:3px solid}
+.alert.warn{background:#fff3cd;color:#856404;border-color:#ffc107}
+.alert.danger{background:#fde8e8;color:#721c24;border-color:#e74c3c;display:none}
+.alert.info{background:#e8f4fd;color:#004085;border-color:#4a90e2}
+
+/* ===== NAV ===== */
+.nav{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap;padding-top:.875rem;border-top:1px solid #f0f0f0}
+.btn-p{padding:8px 22px;background:#1a1a2e;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:bold;transition:opacity .15s}
+.btn-p:hover{opacity:.82}
+.btn-s{padding:8px 22px;background:#f0f0f0;color:#333;border:1px solid #ccc;border-radius:7px;font-size:13px;cursor:pointer}
+.btn-s:hover{background:#e0e0e0}
+
+/* ===== SYNTHESE ===== */
+.wbank{display:flex;flex-wrap:wrap;gap:7px;padding:12px;background:#fffde7;border:2px dashed #f5a623;border-radius:10px;margin-bottom:1rem;min-height:48px}
+.wbank-lbl{font-size:11px;font-weight:bold;color:#856404;width:100%;margin-bottom:3px}
+.wchip{font-size:12px;padding:5px 13px;border-radius:20px;background:#f5a623;color:#fff;border:none;cursor:grab;user-select:none;display:inline-block;font-weight:bold;transition:opacity .2s}
+.wchip:active{cursor:grabbing;opacity:.6}
+.wchip.used{opacity:.2;pointer-events:none;background:#ccc}
+.blank{display:inline-block;min-width:110px;height:26px;border-bottom:2px solid #1a1a2e;margin:0 3px;vertical-align:middle;background:#fffde7;border-radius:4px 4px 0 0;padding:0 6px;font-size:13px;font-weight:bold;color:#1a1a2e;text-align:center;line-height:26px;cursor:pointer;transition:background .15s}
+.blank.filled{background:#d4edda;border-color:#27ae60;color:#155724}
+.blank.dropover{background:#d4eeff;border-color:#4a90e2}
+.synth-p{font-size:13px;line-height:2.9;margin-bottom:.875rem;color:#1a1a2e}
+.synth-box{border:1px solid #dde0e6;border-radius:10px;padding:1.25rem;background:#fff}
+.synth-head{font-size:13px;font-weight:bold;border-bottom:1px solid #eee;padding-bottom:.75rem;margin-bottom:1rem;color:#1a1a2e}
+
+/* ===== PRINT ===== */
+@media print{
+  body{background:#fff;font-size:12pt}
+  .wrap{padding:0;max-width:100%}
+  .header,.steps,.pbar,.modal-bg{display:none!important}
+  .sec{display:none!important}
+  .sec.print-active{display:block!important;border:none!important;padding:0}
+  .nav,.btn-p,.btn-s,.drag-pool,.wbank{display:none!important}
+  .alert{display:none!important}
+  .card,.qcard{border:1px solid #ccc!important;break-inside:avoid;margin-bottom:8pt}
+  .opt.sel{background:#1a1a2e!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .tfb.sel{background:#1a1a2e!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .blank{background:#fff!important;border-color:#000!important;color:#000!important}
+  .blank.filled{background:#d4edda!important;color:#155724!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  input.field,textarea.field{border:1px solid #999!important;background:#fff!important}
+  .chip.placed{display:none}
+  .dzone .chip{background:#27ae60!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .jtable{font-size:10pt}
+  @page{margin:1.5cm}
+}
+@media(max-width:600px){
+  .def-grid,.tool-grid{grid-template-columns:1fr}
+  .jtable th,.jtable td{font-size:10px}
+}
+
+.alert.result{display:none;font-size:13px;line-height:1.6;font-weight:bold}
+.alert.result.show{display:block}
+.alert.result.ok{background:#d4edda;color:#155724;border-color:#27ae60}
+.alert.result.ko{background:#fde8e8;color:#721c24;border-color:#e74c3c}
+.alert.danger.show{display:block}
+.dzone .chip{cursor:pointer}
+.chip.sel-click,.wchip.sel-click{outline:3px solid #4a90e2}
+.cw-clues{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cw-clues .cl{font-size:12px;line-height:1.5;padding:5px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid transparent}
+.cw-clues .cl:hover{background:#f0f6ff}
+.cw-clues .cl.act{background:#fff3cd;border-color:#ffc107}
+.cw-clues .cl b{color:#1a1a2e}
+#cw{display:grid;gap:2px;width:max-content;margin:6px 0}
+.cwc{width:27px;height:27px;position:relative}
+.cwc input{width:100%;height:100%;border:1.5px solid #1a1a2e;background:#fff;text-align:center;font-size:14px;font-weight:bold;text-transform:uppercase;padding:0;border-radius:2px;outline:none;font-family:Arial,sans-serif;color:#1a1a2e}
+.cwc input:focus{background:#fff3cd}
+.cwc.hl input{background:#fff9db}
+.cwc .nb{position:absolute;top:0;left:1px;font-size:8px;line-height:9px;color:#4a90e2;font-weight:bold;pointer-events:none}
+@media(max-width:700px){.cw-clues{grid-template-columns:1fr}}
+@media print{.alert.result{display:block!important}.cw-clues .cl{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div>
+    <h1>Le parcours client omnicanal</h1>
+    <div class="sub">1re Bac Pro MCV · Bloc 1 Conseiller et vendre · Intégrer l'omnicanal dans le processus de vente · Travail individuel sur ordinateur</div>
+  </div>
+  <span class="badge">Darty &amp; Carrefour</span>
+</div>
+
+<div class="steps">
+  <div class="step active" id="t1" onclick="tryNav(1)">📖 Cours</div>
+  <div class="step locked" id="t2" onclick="tryNav(2)">Act.1 · Darty</div>
+  <div class="step locked" id="t3" onclick="tryNav(3)">Act.2 · Carrefour</div>
+  <div class="step locked" id="t4" onclick="tryNav(4)">Act.3 · Situations</div>
+  <div class="step locked" id="t5" onclick="tryNav(5)">Act.4 · Parcours</div>
+  <div class="step locked" id="t6" onclick="tryNav(6)">Act.5 · Vrai/Faux</div>
+  <div class="step locked" id="t7" onclick="tryNav(7)">Act.6 · Mots croisés</div>
+  <div class="step locked" id="t8" onclick="tryNav(8)">📄 Synthèse</div>
+</div>
+<div class="pbar"><div class="pfill" id="pb" style="width:0%"></div></div>
+
+<div class="sec on" id="sec1">
+  <div class="shd">
+    <div class="snum">1</div>
+    <div><div class="stit">Le cours — lis attentivement avant de commencer</div><div class="ssub">Tout ce dont tu as besoin pour les activités. Les définitions sont celles du chapitre « Intégrer l'omnicanal dans le processus de vente ».</div></div>
+    <div class="dur">10 min</div>
+  </div>
+
+  <div class="lbl">De l'UCP à l'UCV : où le client achète-t-il ?</div>
+  <div class="def-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="def-card"><div class="def-icon">🏬</div><div class="def-lbl">UCP — Unité Commerciale Physique</div><div class="def-body">Le <strong>magasin</strong> : le point de vente où le client se rend.</div></div>
+    <div class="def-card"><div class="def-icon">🌐</div><div class="def-lbl">UCV — Unité Commerciale Virtuelle</div><div class="def-body">Le <strong>site marchand</strong>, l'application : le point de vente sur internet.</div></div>
+  </div>
+
+  <div class="lbl">Les 4 niveaux de canal</div>
+  <div class="def-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="def-card"><div class="def-icon">1️⃣</div><div class="def-lbl">Monocanal</div><div class="def-body"><strong>Un seul</strong> canal de vente (ex. une boutique sans site internet).</div></div>
+    <div class="def-card"><div class="def-icon">📺</div><div class="def-lbl">Multi-canal</div><div class="def-body">Plusieurs canaux (magasin, site, appli…) mais <strong>séparés</strong> : ils ne communiquent pas entre eux.</div></div>
+    <div class="def-card"><div class="def-icon">🔗</div><div class="def-lbl">Cross-canal</div><div class="def-body">Les canaux sont <strong>reliés</strong> : le client peut commencer son achat sur un canal et le finir sur un autre.</div></div>
+    <div class="def-card"><div class="def-icon">♾️</div><div class="def-lbl">Omnicanal</div><div class="def-body">Tous les canaux sont <strong>synchronisés en temps réel</strong> (stock, prix, historique client) : une expérience <strong>unique et fluide</strong>.</div></div>
+  </div>
+
+  <div class="lbl">Les 3 circuits de distribution</div>
+  <div class="def-grid">
+    <div class="def-card"><div class="def-icon">🌾</div><div class="def-lbl">Canal direct</div><div class="def-body">Le producteur vend <strong>directement</strong> au consommateur, sans intermédiaire (ex. vente à la ferme).</div></div>
+    <div class="def-card"><div class="def-icon">🏪</div><div class="def-lbl">Canal court</div><div class="def-body"><strong>Un seul intermédiaire</strong> : le détaillant (ex. fabricant → enseigne → client).</div></div>
+    <div class="def-card"><div class="def-icon">🚚</div><div class="def-lbl">Canal long</div><div class="def-body"><strong>Plusieurs intermédiaires</strong> : grossiste, centrale d'achat, détaillant…</div></div>
+  </div>
+
+  <div class="lbl">Les 4 parcours d'achat de l'e-consommateur</div>
+  <div class="def-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="def-card"><div class="def-icon">🔎</div><div class="def-lbl">Web-to-store (ROPO)</div><div class="def-body"><em>Research Online, Purchase Offline</em> : le client se renseigne sur internet (prix, avis, stock) puis <strong>achète en magasin</strong>.</div></div>
+    <div class="def-card"><div class="def-icon">🛍️</div><div class="def-lbl">Click &amp; Collect</div><div class="def-body">Le client <strong>commande et paie en ligne</strong>, puis retire sa commande en magasin (ou au drive).</div></div>
+    <div class="def-card"><div class="def-icon">🖥️</div><div class="def-lbl">Store-to-web</div><div class="def-body">Le client est <strong>en magasin</strong>, puis commande <strong>sur internet</strong> (mobile, borne, tablette du vendeur).</div></div>
+    <div class="def-card"><div class="def-icon">📅</div><div class="def-lbl">E-réservation</div><div class="def-body">Le client <strong>réserve en ligne</strong>, puis vient essayer et <strong>payer en magasin</strong>.</div></div>
+  </div>
+  <div class="alert info">💡 Ne confonds pas : <strong>Click &amp; Collect = paiement en ligne</strong> ; <strong>e-réservation = paiement en magasin</strong>.</div>
+
+  <div class="lbl">Les outils numériques à connaître</div>
+  <div class="tool-grid">
+    <div class="tool-card"><div class="tool-nm">📱 Application mobile</div><div class="tool-de">Commander, suivre une livraison, consulter sa fidélité, scanner, recevoir des notifications</div></div>
+    <div class="tool-card"><div class="tool-nm">🛍️ Click &amp; Collect</div><div class="tool-de">Commander en ligne → retirer en magasin</div></div>
+    <div class="tool-card"><div class="tool-nm">💳 Carte de fidélité numérique</div><div class="tool-de">Identifie le client en ligne ET en magasin, sur tous les canaux</div></div>
+    <div class="tool-card"><div class="tool-nm">🚗 Drive</div><div class="tool-de">Commander en ligne → retrait au guichet drive du supermarché</div></div>
+    <div class="tool-card"><div class="tool-nm">🖥️ Borne interactive</div><div class="tool-de">En magasin : commander un produit absent du rayon, livraison à domicile</div></div>
+    <div class="tool-card"><div class="tool-nm">📞 SAV multicanal</div><div class="tool-de">Service après-vente joignable par téléphone, appli ET site web</div></div>
+    <div class="tool-card"><div class="tool-nm">🏷️ Étiquette électronique (ESL)</div><div class="tool-de">Étiquette de rayon dont le prix se met à jour automatiquement</div></div>
+    <div class="tool-card"><div class="tool-nm">🔦 Scan (douchette, smartphone)</div><div class="tool-de">Lire un code-barres : prix, stock, commande</div></div>
+    <div class="tool-card"><div class="tool-nm">🌐 E-commerce</div><div class="tool-de">Vente de produits ou de services à distance, via internet</div></div>
+  </div>
+
+  <div class="lbl">Le mot « phygital »</div>
+  <div class="card blue" style="font-size:13px;line-height:1.7"><strong>Phygital</strong> = <em>physique + digital</em> : apporter les avantages du numérique (écrans, bornes, appli, ESL…) dans le magasin physique.</div>
+
+  <div class="alert warn">📌 <strong>Règle de l'évaluation :</strong> chaque activité est <strong>notée sur 20</strong>. Il faut au moins <strong>18/20</strong> pour passer à la suite. L'ordinateur t'indique ta note, le nombre de bonnes et de mauvaises réponses, mais <strong>pas où sont les erreurs</strong> : relis le cours et cherche. Tu peux corriger et valider autant de fois que nécessaire. Dès que tu as atteint la note, tu passes à l'activité suivante.</div>
+
+  <div class="nav">
+    <button class="btn-p" onclick="goNext(1)">J'ai lu le cours, commencer l'activité 1 →</button>
+  </div>
+</div>
+
+<div class="sec" id="sec2">
+  <div class="shd">
+    <div class="snum">2</div>
+    <div><div class="stit">Activité 1 — Recherche sur le site Darty</div><div class="ssub">Ouvre darty.com dans un onglet à côté. Partie A : relevés sur le site (non notés par l'ordinateur). Partie B : tu réutilises le cours (notée sur 20, il faut au moins 18/20).</div></div>
+    <div class="dur">20 min</div>
+  </div>
+  <a class="site-link" href="https://www.darty.com" target="_blank">🔗 Ouvrir www.darty.com dans un nouvel onglet</a>
+
+  <div class="lbl">Partie A — Je cherche sur le site (observation, corrigée par le professeur)</div>
+  <div class="qcard" id="qd1">
+    <div class="qnum">Partie A · Question 1 / 9</div>
+    <div class="qtext">Sur darty.com, comment peut-on livrer un produit ? Combien de modes de livraison différents sont proposés ?</div>
+    <div class="consigne">👉 Cherche dans le menu "Livraison" en haut ou en bas du site darty.com.</div>
+    <div class="opts" id="od1">
+      <button class="opt" onclick="choix(this,'od1')">1 seul mode (livraison à domicile)</button>
+      <button class="opt" onclick="choix(this,'od1')">2 modes (domicile + retrait)</button>
+      <button class="opt" onclick="choix(this,'od1')">3 modes ou plus</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cite les modes de livraison trouvés sur le site :</div>
+      <input class="field" id="fd1a" placeholder="Ex : livraison à domicile, retrait en magasin, retrait en point relais…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd2">
+    <div class="qnum">Partie A · Question 2 / 9</div>
+    <div class="qtext">Sur darty.com, est-il possible de voir si un produit est disponible dans un magasin Darty proche de chez soi ?</div>
+    <div class="consigne">👉 Va sur la fiche d'un produit (ex : une télévision), puis cherche un bouton ou une option liée à la disponibilité en magasin.</div>
+    <div class="opts" id="od2">
+      <button class="opt" onclick="choix(this,'od2')">Oui, sur chaque fiche produit</button>
+      <button class="opt" onclick="choix(this,'od2')">Non, ce n'est pas possible</button>
+      <button class="opt" onclick="choix(this,'od2')">Je ne trouve pas cette option</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">À quel parcours d'achat du cours correspond cette fonctionnalité ? (consulter le stock en ligne avant de se déplacer) <span style="color:#4a90e2">[noté]</span></div>
+      <div class="opts" id="od2b"><button class="opt" onclick="choix(this,'od2b')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'od2b')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'od2b')">Store-to-web</button><button class="opt" onclick="choix(this,'od2b')">E-réservation</button></div>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Explique en une phrase :</div>
+      <input class="field" id="fd2a" placeholder="Le client utilise… pour… avant de…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd3">
+    <div class="qnum">Partie A · Question 3 / 9</div>
+    <div class="qtext">Darty propose-t-il un abonnement payant pour la réparation et l'assistance des appareils électroménagers ?</div>
+    <div class="consigne">👉 Cherche "Darty Max" dans la barre de recherche du site ou dans le menu "Services".</div>
+    <div class="opts" id="od3">
+      <button class="opt" onclick="choix(this,'od3')">Oui, il s'appelle Darty Max</button>
+      <button class="opt" onclick="choix(this,'od3')">Oui, mais il s'appelle autrement</button>
+      <button class="opt" onclick="choix(this,'od3')">Non, Darty ne propose pas cela</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Que comprend cet abonnement ? (cite au moins 2 avantages trouvés sur le site)</div>
+      <input class="field" id="fd3a" placeholder="Avantage 1 : ex. réparation illimitée…">
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Peut-on souscrire à cet abonnement en ligne ET en magasin ?</div>
+      <input class="field" id="fd3b" placeholder="Réponds oui ou non, puis justifie…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd4">
+    <div class="qnum">Partie A · Question 4 / 9</div>
+    <div class="qtext">Darty propose-t-il une application mobile ? Sur quelles plateformes est-elle disponible ?</div>
+    <div class="consigne">👉 Cherche "application Darty" dans Google ou en bas de la page darty.com.</div>
+    <div class="opts" id="od4">
+      <button class="opt" onclick="choix(this,'od4')">Oui, sur iOS (iPhone) seulement</button>
+      <button class="opt" onclick="choix(this,'od4')">Oui, sur Android seulement</button>
+      <button class="opt" onclick="choix(this,'od4')">Oui, sur iOS et Android</button>
+      <button class="opt" onclick="choix(this,'od4')">Non, pas d'application</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cite 2 fonctionnalités de cette application liées à l'omnicanal :</div>
+      <input class="field" id="fd4a" placeholder="Fonctionnalité 1 :">
+      <input class="field" id="fd4b" placeholder="Fonctionnalité 2 :" style="margin-top:5px">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd5">
+    <div class="qnum">Partie A · Question 5 / 9</div>
+    <div class="qtext">Darty propose-t-il la livraison à domicile ? Quel est le délai le plus rapide affiché sur le site ?</div>
+    <div class="consigne">👉 Sur darty.com, clique sur un produit et regarde les options de livraison proposées.</div>
+    <div class="opts" id="od5">
+      <button class="opt" onclick="choix(this,'od5')">Livraison en moins de 24h possible</button>
+      <button class="opt" onclick="choix(this,'od5')">Livraison en 2 à 5 jours seulement</button>
+      <button class="opt" onclick="choix(this,'od5')">Pas de livraison à domicile</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Peut-on suivre sa livraison Darty ? Via quel outil ?</div>
+      <input class="field" id="fd5a" placeholder="Oui/Non — et si oui, via l'appli / le site / un SMS…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd6">
+    <div class="qnum">Partie A · Question 6 / 9</div>
+    <div class="qtext">Darty propose-t-il un espace client personnel ("Mon compte") sur son site ?</div>
+    <div class="consigne">👉 Cherche "Mon compte" ou une icône personne en haut à droite du site darty.com.</div>
+    <div class="opts" id="od6">
+      <button class="opt" onclick="choix(this,'od6')">Oui, il y a un espace client</button>
+      <button class="opt" onclick="choix(this,'od6')">Non, il n'y a pas d'espace client</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cite 2 informations accessibles dans cet espace client :</div>
+      <input class="field" id="fd6a" placeholder="Ex : mes commandes, mes factures, mon historique de réparations…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd7">
+    <div class="qnum">Partie A · Question 7 / 9</div>
+    <div class="qtext">Comment peut-on contacter le service client Darty ? Cherche toutes les façons possibles.</div>
+    <div class="consigne">👉 Va dans "Aide" ou "Contact" en bas du site darty.com et note tous les canaux de contact proposés.</div>
+    <div class="opts" id="od7">
+      <button class="opt" onclick="choix(this,'od7')">Seulement par téléphone</button>
+      <button class="opt" onclick="choix(this,'od7')">Téléphone + chat en ligne</button>
+      <button class="opt" onclick="choix(this,'od7')">Téléphone + chat + email + appli</button>
+      <button class="opt" onclick="choix(this,'od7')">Seulement en magasin physique</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Quel terme du cours correspond à un SAV joignable sur plusieurs canaux ?</div>
+      <input class="field" id="fd7a" placeholder="Le terme exact du cours est : …">
+    </div>
+  </div>
+
+  <div class="qcard" id="qd8">
+    <div class="qnum">Partie A · Question 8 / 9</div>
+    <div class="qtext">Sur darty.com, les clients peuvent-ils laisser des avis sur les produits ? Ces avis sont-ils visibles par tous ?</div>
+    <div class="consigne">👉 Va sur la fiche d'un produit (ex : lave-linge), fais défiler la page vers le bas et cherche les avis.</div>
+    <div class="opts" id="od8">
+      <button class="opt" onclick="choix(this,'od8')">Oui, les avis sont visibles par tous</button>
+      <button class="opt" onclick="choix(this,'od8')">Non, il n'y a pas d'avis clients</button>
+      <button class="opt" onclick="choix(this,'od8')">Je ne trouve pas les avis</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">À quelle étape du parcours client les avis sont-ils utiles ? <span style="color:#4a90e2">[noté]</span></div>
+      <div class="opts" id="od8b">
+        <button class="opt" onclick="choix(this,'od8b')">Avant l'achat — pour choisir</button>
+        <button class="opt" onclick="choix(this,'od8b')">Pendant l'achat — pour payer</button>
+        <button class="opt" onclick="choix(this,'od8b')">Après l'achat — pour se plaindre</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="qcard" id="qd9">
+    <div class="qnum">Partie A · Question 9 / 9</div>
+    <div class="qtext">En regardant tout ce que propose Darty, la stratégie de Darty est-elle plutôt multi-canal, cross-canal ou omnicanal ?</div>
+    <div class="consigne">👉 Relis tes réponses aux questions 1 à 8 et les définitions du cours.</div>
+    <div class="opts" id="od9">
+      <button class="opt" onclick="choix(this,'od9')">Multi-canal — les canaux sont séparés</button>
+      <button class="opt" onclick="choix(this,'od9')">Cross-canal — les canaux sont reliés</button>
+      <button class="opt" onclick="choix(this,'od9')">Omnicanal — tous les canaux sont synchronisés</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Justifie ta réponse avec un exemple concret trouvé sur le site :</div>
+      <input class="field" id="fd9a" placeholder="Ex : chez Darty, quand on commande sur le site, on peut aussi… ce qui prouve que…">
+    </div>
+  </div>
+
+  <div class="lbl">Partie B — Je réutilise le cours (noté sur 20 : il faut 18/20 minimum)</div>
+  <div class="qcard" id="qa1">
+    <div class="qnum">Partie B · Question 1 / 8</div>
+    <div class="qtext">Marc cherche un téléviseur sur darty.com, compare les prix et lit les avis, puis va l'acheter dans le magasin de sa ville.</div>
+    <div class="consigne">👉 Quel parcours d'achat ?</div>
+    <div class="opts" id="da1"><button class="opt" onclick="choix(this,'da1')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'da1')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'da1')">Store-to-web</button><button class="opt" onclick="choix(this,'da1')">E-réservation</button></div>
+  </div>
+  <div class="qcard" id="qa2">
+    <div class="qnum">Partie B · Question 2 / 8</div>
+    <div class="qtext">Léa commande et paie son lave-linge sur l'application Darty, puis retire sa commande au point de retrait du magasin.</div>
+    <div class="consigne">👉 Quel parcours d'achat ?</div>
+    <div class="opts" id="da2"><button class="opt" onclick="choix(this,'da2')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'da2')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'da2')">Store-to-web</button><button class="opt" onclick="choix(this,'da2')">E-réservation</button></div>
+  </div>
+  <div class="qcard" id="qa3">
+    <div class="qnum">Partie B · Question 3 / 8</div>
+    <div class="qtext">En magasin, Inès ne trouve pas la taille de téléviseur qu'elle veut. Le vendeur la commande pour elle sur sa tablette, et elle est livrée à domicile.</div>
+    <div class="consigne">👉 Quel parcours d'achat ?</div>
+    <div class="opts" id="da3"><button class="opt" onclick="choix(this,'da3')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'da3')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'da3')">Store-to-web</button><button class="opt" onclick="choix(this,'da3')">E-réservation</button></div>
+  </div>
+  <div class="qcard" id="qa4">
+    <div class="qnum">Partie B · Question 4 / 8</div>
+    <div class="qtext">Ahmed réserve un aspirateur sur le site, passe l'essayer au magasin et le paie à la caisse.</div>
+    <div class="consigne">👉 Quel parcours d'achat ?</div>
+    <div class="opts" id="da4"><button class="opt" onclick="choix(this,'da4')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'da4')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'da4')">Store-to-web</button><button class="opt" onclick="choix(this,'da4')">E-réservation</button></div>
+  </div>
+  <div class="qcard" id="qa5">
+    <div class="qnum">Partie B · Question 5 / 8</div>
+    <div class="qtext">Le site marchand darty.com est une…</div>
+    
+    <div class="opts" id="da5"><button class="opt" onclick="choix(this,'da5')">UCP (unité commerciale physique)</button><button class="opt" onclick="choix(this,'da5')">UCV (unité commerciale virtuelle)</button><button class="opt" onclick="choix(this,'da5')">Borne interactive</button></div>
+  </div>
+  <div class="qcard" id="qa6">
+    <div class="qnum">Partie B · Question 6 / 8</div>
+    <div class="qtext">Samsung vend ses téléviseurs à Darty, qui les revend aux clients. Quel est le circuit de distribution ?</div>
+    
+    <div class="opts" id="da6"><button class="opt" onclick="choix(this,'da6')">Canal direct</button><button class="opt" onclick="choix(this,'da6')">Canal court</button><button class="opt" onclick="choix(this,'da6')">Canal long</button></div>
+  </div>
+  <div class="qcard" id="qa7">
+    <div class="qnum">Partie B · Question 7 / 8</div>
+    <div class="qtext">Le site, l'appli et le magasin de l'enseigne partagent en temps réel le stock et l'historique d'achat du client. De quel niveau de canal s'agit-il ?</div>
+    
+    <div class="opts" id="da7"><button class="opt" onclick="choix(this,'da7')">Monocanal</button><button class="opt" onclick="choix(this,'da7')">Multi-canal</button><button class="opt" onclick="choix(this,'da7')">Cross-canal</button><button class="opt" onclick="choix(this,'da7')">Omnicanal</button></div>
+  </div>
+  <div class="qcard" id="qa8">
+    <div class="qnum">Partie B · Question 8 / 8</div>
+    <div class="qtext">Une enseigne a un magasin, un site et une appli, mais ces trois canaux sont gérés séparément et ne s'échangent aucune information. De quel niveau de canal s'agit-il ?</div>
+    
+    <div class="opts" id="da8"><button class="opt" onclick="choix(this,'da8')">Monocanal</button><button class="opt" onclick="choix(this,'da8')">Multi-canal</button><button class="opt" onclick="choix(this,'da8')">Cross-canal</button><button class="opt" onclick="choix(this,'da8')">Omnicanal</button></div>
+  </div>
+  <div class="alert danger" id="err2"></div>
+  <div class="alert result" id="res2"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="navDirect(1)">← Retour au cours</button>
+    <button class="btn-s" onclick="imprimerSection(2)">🖨 Imprimer mes réponses</button>
+    <button class="btn-p" onclick="valider(2)">Valider et continuer →</button>
+  </div>
+</div>
+
+
+<div class="sec" id="sec3">
+  <div class="shd">
+    <div class="snum">3</div>
+    <div><div class="stit">Activité 2 — Recherche sur le site Carrefour</div><div class="ssub">Ouvre carrefour.fr dans un onglet à côté. Partie A : relevés (non notés). Partie B : cours (notée sur 20, il faut 18/20 minimum).</div></div>
+    <div class="dur">20 min</div>
+  </div>
+  <a class="site-link" href="https://www.carrefour.fr" target="_blank">🔗 Ouvrir www.carrefour.fr dans un nouvel onglet</a>
+
+  <div class="lbl">Partie A — Je cherche sur le site (observation, corrigée par le professeur)</div>
+  <div class="qcard" id="qc1">
+    <div class="qnum">Partie A · Question 1 / 9</div>
+    <div class="qtext">Sur carrefour.fr, combien de façons différentes peut-on recevoir ou récupérer ses courses ?</div>
+    <div class="consigne">👉 Sur carrefour.fr, cherche dans le menu principal les différentes options de livraison ou de retrait proposées.</div>
+    <div class="opts" id="oc1">
+      <button class="opt" onclick="choix(this,'oc1')">1 seule façon (livraison à domicile)</button>
+      <button class="opt" onclick="choix(this,'oc1')">2 façons (livraison + drive)</button>
+      <button class="opt" onclick="choix(this,'oc1')">3 façons ou plus</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cite les différentes façons de récupérer ses achats Carrefour :</div>
+      <input class="field" id="fc1a" placeholder="Ex : livraison à domicile, Carrefour Drive, retrait en magasin…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc2">
+    <div class="qnum">Partie A · Question 2 / 9</div>
+    <div class="qtext">Comment fonctionne le Carrefour Drive ? Décris les étapes du processus.</div>
+    <div class="consigne">👉 Sur carrefour.fr, cherche "Drive" dans le menu puis lis la description du service.</div>
+    <div class="opts" id="oc2">
+      <button class="opt" onclick="choix(this,'oc2')">On commande en magasin et on est livré chez soi</button>
+      <button class="opt" onclick="choix(this,'oc2')">On commande en ligne et on retire au guichet drive</button>
+      <button class="opt" onclick="choix(this,'oc2')">On commande par téléphone et on paie en magasin</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">À quel parcours d'achat du cours correspond ce service ? Pourquoi ?</div>
+      <input class="field" id="fc2a" placeholder="C'est du… parce que le client commande… et retire…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc3">
+    <div class="qnum">Partie A · Question 3 / 9</div>
+    <div class="qtext">Carrefour propose-t-il une application mobile ? Sur quelles plateformes ?</div>
+    <div class="consigne">👉 Cherche "application Carrefour" dans Google ou en bas de la page carrefour.fr.</div>
+    <div class="opts" id="oc3">
+      <button class="opt" onclick="choix(this,'oc3')">Oui, sur iOS et Android</button>
+      <button class="opt" onclick="choix(this,'oc3')">Oui, sur Android seulement</button>
+      <button class="opt" onclick="choix(this,'oc3')">Non, pas d'application</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cite 2 fonctionnalités de l'appli liées à l'omnicanal (autres que le catalogue) :</div>
+      <input class="field" id="fc3a" placeholder="Fonctionnalité 1 :">
+      <input class="field" id="fc3b" placeholder="Fonctionnalité 2 :" style="margin-top:5px">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc4">
+    <div class="qnum">Partie A · Question 4 / 9</div>
+    <div class="qtext">Carrefour propose-t-il un programme de fidélité pour ses clients ?</div>
+    <div class="consigne">👉 Cherche "fidélité" ou "avantages clients" sur carrefour.fr ou dans le menu principal.</div>
+    <div class="opts" id="oc4">
+      <button class="opt" onclick="choix(this,'oc4')">Oui, il existe un programme fidélité</button>
+      <button class="opt" onclick="choix(this,'oc4')">Non, Carrefour n'a pas de fidélité</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Comment s'appelle ce programme et peut-il être utilisé en ligne ET en magasin ?</div>
+      <input class="field" id="fc4a" placeholder="Nom : … / Utilisable en ligne ET magasin : oui/non">
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Quel avantage ce programme offre-t-il au client ?</div>
+      <div class="opts" id="oc4b">
+        <button class="opt" onclick="choix(this,'oc4b')">Des réductions sur les achats</button>
+        <button class="opt" onclick="choix(this,'oc4b')">Des cadeaux uniquement</button>
+        <button class="opt" onclick="choix(this,'oc4b')">Un accès prioritaire en caisse</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="qcard" id="qc5">
+    <div class="qnum">Partie A · Question 5 / 9</div>
+    <div class="qtext">Sur carrefour.fr, peut-on trouver l'adresse et les horaires d'un magasin Carrefour près de chez soi ?</div>
+    <div class="consigne">👉 Cherche "trouver un magasin" ou "nos magasins" sur carrefour.fr (souvent en bas de page ou dans le menu).</div>
+    <div class="opts" id="oc5">
+      <button class="opt" onclick="choix(this,'oc5')">Oui, il y a un localisateur de magasins</button>
+      <button class="opt" onclick="choix(this,'oc5')">Non, ce n'est pas possible sur le site</button>
+      <button class="opt" onclick="choix(this,'oc5')">Je ne trouve pas cette option</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Cet outil est surtout utile pour quel parcours d'achat ? <span style="color:#4a90e2">[noté]</span></div>
+      <div class="opts" id="oc5b"><button class="opt" onclick="choix(this,'oc5b')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'oc5b')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'oc5b')">Store-to-web</button></div>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Explique en une phrase :</div>
+      <input class="field" id="fc5a" placeholder="Parce que le client peut… depuis son ordinateur, puis…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc6">
+    <div class="qnum">Partie A · Question 6 / 9</div>
+    <div class="qtext">Le service Carrefour Drive (commande et paiement en ligne, retrait au guichet) correspond à quel parcours d'achat ? <span style="color:#4a90e2">[noté]</span></div>
+    <div class="consigne">👉 Relis les 4 parcours d'achat dans le cours (onglet 1).</div>
+    <div class="opts" id="oc6">
+      <button class="opt" onclick="choix(this,'oc6')">Web-to-store (ROPO)</button>
+      <button class="opt" onclick="choix(this,'oc6')">Click &amp; Collect</button>
+      <button class="opt" onclick="choix(this,'oc6')">Store-to-web</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Explique pourquoi en une phrase :</div>
+      <input class="field" id="fc6a" placeholder="Parce que le client commence sur… et finit en…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc7">
+    <div class="qnum">Partie A · Question 7 / 9</div>
+    <div class="qtext">Sur carrefour.fr, peut-on passer une commande alimentaire en ligne pour se la faire livrer à domicile (et non au drive) ?</div>
+    <div class="consigne">👉 Cherche "livraison à domicile" sur carrefour.fr.</div>
+    <div class="opts" id="oc7">
+      <button class="opt" onclick="choix(this,'oc7')">Oui, la livraison à domicile existe</button>
+      <button class="opt" onclick="choix(this,'oc7')">Non, seulement le drive est possible</button>
+      <button class="opt" onclick="choix(this,'oc7')">Je ne trouve pas cette option</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Ce service de livraison à domicile, c'est quel modèle de distribution ? Justifie.</div>
+      <input class="field" id="fc7a" placeholder="C'est du … parce que le client commande sur… et reçoit en…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc8">
+    <div class="qnum">Partie A · Question 8 / 9</div>
+    <div class="qtext">Compare : sur darty.com, le retrait en magasin s'appelle "Click & Collect". Quel est le nom équivalent chez Carrefour pour commander en ligne et retirer au guichet ?</div>
+    <div class="consigne">👉 Cherche dans le menu de carrefour.fr le service de retrait de courses commandées en ligne.</div>
+    <div class="opts" id="oc8">
+      <button class="opt" onclick="choix(this,'oc8')">Carrefour Drive</button>
+      <button class="opt" onclick="choix(this,'oc8')">Click & Collect Carrefour</button>
+      <button class="opt" onclick="choix(this,'oc8')">Retrait Express Carrefour</button>
+      <button class="opt" onclick="choix(this,'oc8')">Carrefour Go</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Quelle est la différence entre le Drive Carrefour et le Click & Collect Darty ?</div>
+      <input class="field" id="fc8a" placeholder="Similitudes : … / Différences : …">
+    </div>
+  </div>
+
+  <div class="qcard" id="qc9">
+    <div class="qnum">Partie A · Question 9 / 9</div>
+    <div class="qtext">D'après tes recherches sur les deux sites, laquelle des deux enseignes propose le plus d'outils numériques omnicanaux ?</div>
+    <div class="consigne">👉 Relis tes réponses de l'activité 1 (Darty) et compare avec ce que tu as trouvé pour Carrefour.</div>
+    <div class="opts" id="oc9">
+      <button class="opt" onclick="choix(this,'oc9')">Darty — plus d'outils omnicanaux</button>
+      <button class="opt" onclick="choix(this,'oc9')">Carrefour — plus d'outils omnicanaux</button>
+      <button class="opt" onclick="choix(this,'oc9')">Les deux proposent des outils similaires</button>
+    </div>
+    <div class="field-wrap">
+      <div class="field-lbl">Donne un outil numérique propre à chaque enseigne que tu as trouvé :</div>
+      <input class="field" id="fc9a" placeholder="Outil spécifique à Darty : … / Outil spécifique à Carrefour : …">
+    </div>
+  </div>
+
+  <div class="lbl">Partie B — Je réutilise le cours (noté sur 20 : il faut 18/20 minimum)</div>
+  <div class="qcard" id="qb1">
+    <div class="qnum">Partie B · Question 1 / 8</div>
+    <div class="qtext">Un producteur local de fromages vend ses produits à Carrefour, qui les revend en magasin. Quel est le circuit de distribution ?</div>
+    
+    <div class="opts" id="cb1"><button class="opt" onclick="choix(this,'cb1')">Canal direct</button><button class="opt" onclick="choix(this,'cb1')">Canal court</button><button class="opt" onclick="choix(this,'cb1')">Canal long</button></div>
+  </div>
+  <div class="qcard" id="qb2">
+    <div class="qnum">Partie B · Question 2 / 8</div>
+    <div class="qtext">Un agriculteur vend ses légumes directement aux clients sur le marché. Quel est le circuit de distribution ?</div>
+    
+    <div class="opts" id="cb2"><button class="opt" onclick="choix(this,'cb2')">Canal direct</button><button class="opt" onclick="choix(this,'cb2')">Canal court</button><button class="opt" onclick="choix(this,'cb2')">Canal long</button></div>
+  </div>
+  <div class="qcard" id="qb3">
+    <div class="qnum">Partie B · Question 3 / 8</div>
+    <div class="qtext">Un fabricant vend à un grossiste, qui vend à une enseigne, qui vend au client. Quel est le circuit de distribution ?</div>
+    
+    <div class="opts" id="cb3"><button class="opt" onclick="choix(this,'cb3')">Canal direct</button><button class="opt" onclick="choix(this,'cb3')">Canal court</button><button class="opt" onclick="choix(this,'cb3')">Canal long</button></div>
+  </div>
+  <div class="qcard" id="qb4">
+    <div class="qnum">Partie B · Question 4 / 8</div>
+    <div class="qtext">Dans le magasin, un client scanne un produit absent du rayon sur la borne, puis le commande pour être livré chez lui. Quel parcours d'achat ?</div>
+    
+    <div class="opts" id="cb4"><button class="opt" onclick="choix(this,'cb4')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'cb4')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'cb4')">Store-to-web</button><button class="opt" onclick="choix(this,'cb4')">E-réservation</button></div>
+  </div>
+  <div class="qcard" id="qb5">
+    <div class="qnum">Partie B · Question 5 / 8</div>
+    <div class="qtext">L'étiquette électronique de rayon (ESL) sert surtout à…</div>
+    
+    <div class="opts" id="cb5"><button class="opt" onclick="choix(this,'cb5')">afficher un prix mis à jour automatiquement, identique à celui du site</button><button class="opt" onclick="choix(this,'cb5')">scanner les codes-barres des produits</button><button class="opt" onclick="choix(this,'cb5')">permettre au client de payer en ligne</button></div>
+  </div>
+  <div class="qcard" id="qb6">
+    <div class="qnum">Partie B · Question 6 / 8</div>
+    <div class="qtext">Pour l'enseigne, la carte de fidélité numérique permet surtout de…</div>
+    
+    <div class="opts" id="cb6"><button class="opt" onclick="choix(this,'cb6')">connaître les achats du client sur tous les canaux</button><button class="opt" onclick="choix(this,'cb6')">supprimer les magasins physiques</button><button class="opt" onclick="choix(this,'cb6')">baisser tous les prix</button></div>
+  </div>
+  <div class="qcard" id="qb7">
+    <div class="qnum">Partie B · Question 7 / 8</div>
+    <div class="qtext">Un commerçant n'a qu'une boutique et aucun site internet. De quel niveau de canal s'agit-il ?</div>
+    
+    <div class="opts" id="cb7"><button class="opt" onclick="choix(this,'cb7')">Monocanal</button><button class="opt" onclick="choix(this,'cb7')">Multi-canal</button><button class="opt" onclick="choix(this,'cb7')">Cross-canal</button><button class="opt" onclick="choix(this,'cb7')">Omnicanal</button></div>
+  </div>
+  <div class="qcard" id="qb8">
+    <div class="qnum">Partie B · Question 8 / 8</div>
+    <div class="qtext">Commander ses courses sur carrefour.fr, c'est acheter sur…</div>
+    
+    <div class="opts" id="cb8"><button class="opt" onclick="choix(this,'cb8')">l'UCP (unité commerciale physique)</button><button class="opt" onclick="choix(this,'cb8')">l'UCV (unité commerciale virtuelle)</button><button class="opt" onclick="choix(this,'cb8')">un point de retrait</button></div>
+  </div>
+  <div class="alert danger" id="err3"></div>
+  <div class="alert result" id="res3"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="navDirect(2)">← Act.1</button>
+    <button class="btn-s" onclick="imprimerSection(3)">🖨 Imprimer mes réponses</button>
+    <button class="btn-p" onclick="valider(3)">Valider et continuer →</button>
+  </div>
+</div>
+
+
+<div class="sec" id="sec4">
+  <div class="shd">
+    <div class="snum">4</div>
+    <div><div class="stit">Activité 3 — Identifie le modèle et l'outil numérique</div><div class="ssub">Pour chaque situation, coche le bon niveau de canal, l'outil et le parcours. Activité notée sur 20 : il faut 18/20 minimum.</div></div>
+    <div class="dur">15 min</div>
+  </div>
+
+  <div class="qcard" id="qq1">
+    <div class="qnum">Situation 1 — Darty</div>
+    <div class="qtext">Marc consulte les avis sur Darty.com, vérifie que le téléviseur est disponible dans le magasin de sa ville, puis s'y rend pour l'acheter.</div>
+    <div class="consigne">👉 Le site et le magasin sont-ils reliés ici ? Est-ce que Marc commence sur internet et finit en magasin ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq1a"><button class="opt" onclick="choix(this,'oq1a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq1a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq1a')">Omnicanal</button></div>
+    <div class="lbl">Quel outil numérique est utilisé ?</div>
+    <div class="opts" id="oq1b"><button class="opt" onclick="choix(this,'oq1b')">Site internet</button><button class="opt" onclick="choix(this,'oq1b')">Application mobile</button><button class="opt" onclick="choix(this,'oq1b')">Borne interactive</button><button class="opt" onclick="choix(this,'oq1b')">Drive</button></div>
+    <div class="lbl">Quel parcours d'achat ?</div>
+    <div class="opts" id="oq1c"><button class="opt" onclick="choix(this,'oq1c')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'oq1c')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'oq1c')">Store-to-web</button><button class="opt" onclick="choix(this,'oq1c')">E-réservation</button></div>
+  </div>
+
+  <div class="qcard" id="qq2">
+    <div class="qnum">Situation 2 — Darty</div>
+    <div class="qtext">Sophie commande un frigo sur l'appli Darty, reçoit un SMS, suit la livraison en temps réel et contacte le SAV depuis l'appli qui voit tout son historique d'achat.</div>
+    <div class="consigne">👉 Les canaux (appli, SMS, SAV) sont-ils synchronisés en temps réel ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq2a"><button class="opt" onclick="choix(this,'oq2a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq2a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq2a')">Omnicanal</button></div>
+    <div class="lbl">Outils numériques présents dans cette situation (plusieurs réponses possibles) :</div>
+    <div class="opts" id="oq2b"><button class="opt" onclick="choix(this,'oq2b')">Application mobile</button><button class="opt" onclick="choix(this,'oq2b')">SMS</button><button class="opt" onclick="choix(this,'oq2b')">SAV multicanal</button><button class="opt" onclick="choix(this,'oq2b')">Drive</button></div>
+  </div>
+
+  <div class="qcard" id="qq3">
+    <div class="qnum">Situation 3 — Darty</div>
+    <div class="qtext">Darty vend en ligne sur son site ET en magasin. Mais le vendeur en magasin ne peut pas voir les commandes passées en ligne par le client.</div>
+    <div class="consigne">👉 Les deux canaux (site et magasin) communiquent-ils entre eux ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq3a"><button class="opt" onclick="choix(this,'oq3a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq3a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq3a')">Omnicanal</button></div>
+    <div class="field-wrap">
+      <div class="field-lbl">Qu'est-ce qui prouve que ce n'est pas du cross-canal ?</div>
+      <input class="field" id="fq3a" placeholder="Parce que le vendeur en magasin ne peut pas…">
+    </div>
+  </div>
+
+  <div class="qcard" id="qq4">
+    <div class="qnum">Situation 4 — Carrefour</div>
+    <div class="qtext">Emma commande ses courses sur Carrefour Drive et récupère ses sacs au guichet du supermarché. Elle a payé en ligne.</div>
+    <div class="consigne">👉 Le parcours commence-t-il en ligne et se termine-t-il dans un lieu physique ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq4a"><button class="opt" onclick="choix(this,'oq4a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq4a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq4a')">Omnicanal</button></div>
+    <div class="lbl">Quel outil numérique est utilisé ?</div>
+    <div class="opts" id="oq4b"><button class="opt" onclick="choix(this,'oq4b')">Drive</button><button class="opt" onclick="choix(this,'oq4b')">Borne interactive</button><button class="opt" onclick="choix(this,'oq4b')">SAV multicanal</button><button class="opt" onclick="choix(this,'oq4b')">Application mobile</button></div>
+    <div class="lbl">Quel parcours d'achat ?</div>
+    <div class="opts" id="oq4c"><button class="opt" onclick="choix(this,'oq4c')">Web-to-store (ROPO)</button><button class="opt" onclick="choix(this,'oq4c')">Click &amp; Collect</button><button class="opt" onclick="choix(this,'oq4c')">Store-to-web</button><button class="opt" onclick="choix(this,'oq4c')">E-réservation</button></div>
+  </div>
+
+  <div class="qcard" id="qq5">
+    <div class="qnum">Situation 5 — Carrefour</div>
+    <div class="qtext">Paul achète en caisse avec sa carte fidélité Carrefour. Le soir, l'appli lui envoie des promotions personnalisées selon ses achats du jour.</div>
+    <div class="consigne">👉 Les données du magasin sont-elles transmises instantanément à l'appli ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq5a"><button class="opt" onclick="choix(this,'oq5a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq5a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq5a')">Omnicanal</button></div>
+    <div class="lbl">Outils numériques utilisés ?</div>
+    <div class="opts" id="oq5b"><button class="opt" onclick="choix(this,'oq5b')">Carte fidélité numérique</button><button class="opt" onclick="choix(this,'oq5b')">Application mobile</button><button class="opt" onclick="choix(this,'oq5b')">Borne interactive</button><button class="opt" onclick="choix(this,'oq5b')">Drive</button></div>
+  </div>
+
+  <div class="qcard" id="qq6">
+    <div class="qnum">Situation 6 — Carrefour</div>
+    <div class="qtext">Dans un magasin Carrefour, une borne permet de commander un produit absent du rayon et de se le faire livrer à domicile. La borne ne connaît pas l'historique d'achat du client.</div>
+    <div class="consigne">👉 La borne relie-t-elle le magasin au catalogue numérique ?</div>
+    <div class="lbl">Quel niveau de canal ?</div>
+    <div class="opts" id="oq6a"><button class="opt" onclick="choix(this,'oq6a')">Multi-canal</button><button class="opt" onclick="choix(this,'oq6a')">Cross-canal</button><button class="opt" onclick="choix(this,'oq6a')">Omnicanal</button></div>
+    <div class="lbl">Quel outil numérique est présent dans ce magasin ?</div>
+    <div class="opts" id="oq6b"><button class="opt" onclick="choix(this,'oq6b')">Borne interactive</button><button class="opt" onclick="choix(this,'oq6b')">Drive</button><button class="opt" onclick="choix(this,'oq6b')">Application mobile</button><button class="opt" onclick="choix(this,'oq6b')">SAV multicanal</button></div>
+  </div>
+
+  <div class="alert danger" id="err4"></div>
+  <div class="alert result" id="res4"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="navDirect(3)">← Act.2</button>
+    <button class="btn-s" onclick="imprimerSection(4)">🖨 Imprimer mes réponses</button>
+    <button class="btn-p" onclick="valider(4)">Valider et continuer →</button>
+  </div>
+</div>
+
+
+<div class="sec" id="sec5">
+  <div class="shd">
+    <div class="snum">5</div>
+    <div><div class="stit">Activité 4 — Le parcours client : avant, pendant, après l'achat</div><div class="ssub">Glisse (ou clique sur une étiquette puis sur une case). Clique sur une étiquette placée pour la retirer. Notée sur 20 : 18/20 minimum.</div></div>
+    <div class="dur">10 min</div>
+  </div>
+
+  <div class="card blue">
+    <strong>Mise en situation :</strong> Léa veut acheter un lave-linge chez Darty. Place chaque étape dans la bonne case du tableau :<br>
+    — La <strong>ligne</strong> indique la phase du parcours (Avant / Pendant en magasin / Achat / Après)<br>
+    — La <strong>colonne</strong> indique le canal utilisé (Site web · Magasin · Application · SMS)
+  </div>
+
+  <div class="drag-pool" id="pool">
+    <div class="drag-pool-lbl">📦 12 étapes à placer — une seule case par étiquette</div>
+    <div class="chip" draggable="true" id="e1" ondragstart="startDrag(event)">Recherche Google « lave-linge »</div>
+    <div class="chip" draggable="true" id="e2" ondragstart="startDrag(event)">Lit les avis sur Darty.com</div>
+    <div class="chip" draggable="true" id="e3" ondragstart="startDrag(event)">Vérifie le stock du magasin sur le site</div>
+    <div class="chip" draggable="true" id="e4" ondragstart="startDrag(event)">Conseils du vendeur</div>
+    <div class="chip" draggable="true" id="e5" ondragstart="startDrag(event)">Essai du produit en magasin</div>
+    <div class="chip" draggable="true" id="e6" ondragstart="startDrag(event)">Commande sur l'appli Darty</div>
+    <div class="chip" draggable="true" id="e7" ondragstart="startDrag(event)">Paiement sur le site Darty.com</div>
+    <div class="chip" draggable="true" id="e8" ondragstart="startDrag(event)">SMS annonçant la date de livraison</div>
+    <div class="chip" draggable="true" id="e9" ondragstart="startDrag(event)">Suivi de la livraison (appli)</div>
+    <div class="chip" draggable="true" id="e10" ondragstart="startDrag(event)">SAV contacté via l'appli</div>
+    <div class="chip" draggable="true" id="e11" ondragstart="startDrag(event)">Points de fidélité visibles dans l'appli</div>
+    <div class="chip" draggable="true" id="e12" ondragstart="startDrag(event)">SMS « donnez votre avis »</div>
+  </div>
+
+  <div style="overflow-x:auto">
+  <table class="jtable">
+    <thead>
+      <tr>
+        <th style="width:90px">Phase du parcours</th>
+        <th>🌐 Site web</th>
+        <th>🏬 Magasin physique</th>
+        <th>📱 Application mobile</th>
+        <th>💬 SMS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rowlbl">🔍 Avant<br>l'achat</td>
+        <td><div class="dzone" id="z-av-web" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-av-web')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-av-mag" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-av-mag')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-av-app" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-av-app')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-av-sms" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-av-sms')" ondragleave="leaveDrop(event)"></div></td>
+      </tr>
+      <tr>
+        <td class="rowlbl">🏬 Pendant<br>(en magasin)</td>
+        <td><div class="dzone" id="z-pe-web" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-pe-web')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-pe-mag" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-pe-mag')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-pe-app" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-pe-app')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-pe-sms" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-pe-sms')" ondragleave="leaveDrop(event)"></div></td>
+      </tr>
+      <tr>
+        <td class="rowlbl">💳 Achat</td>
+        <td><div class="dzone" id="z-ac-web" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ac-web')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ac-mag" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ac-mag')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ac-app" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ac-app')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ac-sms" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ac-sms')" ondragleave="leaveDrop(event)"></div></td>
+      </tr>
+      <tr>
+        <td class="rowlbl">⭐ Après<br>l'achat</td>
+        <td><div class="dzone" id="z-ap-web" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ap-web')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ap-mag" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ap-mag')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ap-app" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ap-app')" ondragleave="leaveDrop(event)"></div></td>
+        <td><div class="dzone" id="z-ap-sms" ondragover="allowDrop(event)" ondrop="dropChip(event,'z-ap-sms')" ondragleave="leaveDrop(event)"></div></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div style="margin-top:1rem">
+    <div class="lbl">Questions sur ce parcours</div>
+    <div class="qcard" id="qp1">
+      <div class="qnum">Question A</div>
+      <div class="qtext">À quel(s) moment(s) du parcours de Léa reconnaît-on du web-to-store (ROPO) ? <span style="color:#4a90e2">[noté]</span></div>
+      <div class="consigne">👉 Le web-to-store = se renseigner sur internet PUIS aller en magasin.</div>
+      <div class="opts" id="opa">
+        <button class="opt" onclick="choix(this,'opa')">Quand elle recherche sur Google</button>
+        <button class="opt" onclick="choix(this,'opa')">Quand elle vérifie la dispo en ligne</button>
+        <button class="opt" onclick="choix(this,'opa')">Les deux réponses précédentes</button>
+        <button class="opt" onclick="choix(this,'opa')">Quand elle appelle le SAV</button>
+      </div>
+      <div class="field-wrap">
+        <div class="field-lbl">Pourquoi appelle-t-on ça du web-to-store ?</div>
+        <input class="field" id="fpat" placeholder="Parce que Léa utilise… pour… avant de…">
+      </div>
+    </div>
+    <div class="qcard" id="qp2">
+      <div class="qnum">Question B</div>
+      <div class="qtext">Ce parcours est-il omnicanal ? Justifie.</div>
+      <div class="consigne">👉 Pense à la définition : synchronisation en temps réel, expérience fluide sur tous les canaux.</div>
+      <div class="opts" id="opb">
+        <button class="opt" onclick="choix(this,'opb')">Oui, c'est omnicanal</button>
+        <button class="opt" onclick="choix(this,'opb')">Non, c'est cross-canal</button>
+        <button class="opt" onclick="choix(this,'opb')">Non, c'est multi-canal</button>
+      </div>
+      <div class="field-wrap">
+        <div class="field-lbl">Justifie ta réponse :</div>
+        <input class="field" id="fpbt" placeholder="Parce que les canaux sont… et que Léa vit une expérience…">
+      </div>
+    </div>
+  </div>
+
+  <div class="alert danger" id="err5"></div>
+  <div class="alert result" id="res5"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="resetParcours()">🔄 Recommencer le tableau</button>
+    <button class="btn-s" onclick="navDirect(4)">← Act.3</button>
+    <button class="btn-s" onclick="imprimerSection(5)">🖨 Imprimer mes réponses</button>
+    <button class="btn-p" onclick="valider(5)">Valider et continuer →</button>
+  </div>
+</div>
+
+
+<div class="sec" id="sec6">
+  <div class="shd">
+    <div class="snum">6</div>
+    <div><div class="stit">Activité 5 — Vrai ou Faux ?</div><div class="ssub">Coche ta réponse ET complète la phrase de justification (corrigée par le professeur). Les 10 réponses Vrai/Faux sont notées sur 20 : 18/20 minimum.</div></div>
+    <div class="dur">10 min</div>
+  </div>
+  <div class="qcard" id="qtf1">
+    <div class="qnum">Affirmation 1</div>
+    <div class="qtext">Le multi-canal : les canaux de vente communiquent entre eux.</div>
+    <div class="consigne">👉 Relis la définition du multi-canal dans le cours.</div>
+    <div class="tf" id="tf1"><button class="tfb" onclick="vrfx(this,'tf1')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf1')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf1" placeholder="Le multi-canal, c'est … (séparés / reliés)"></div>
+  </div>
+  <div class="qcard" id="qtf2">
+    <div class="qnum">Affirmation 2</div>
+    <div class="qtext">Le Click &amp; Collect consiste à commander en ligne puis à retirer sa commande en magasin.</div>
+    <div class="consigne">👉 Le client commence-t-il sur internet et finit-il en magasin ?</div>
+    <div class="tf" id="tf2"><button class="tfb" onclick="vrfx(this,'tf2')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf2')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf2" placeholder="Le client commence sur … et finit en …"></div>
+  </div>
+  <div class="qcard" id="qtf3">
+    <div class="qnum">Affirmation 3</div>
+    <div class="qtext">Dans l'omnicanal, tous les canaux sont synchronisés en temps réel.</div>
+    
+    <div class="tf" id="tf3"><button class="tfb" onclick="vrfx(this,'tf3')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf3')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf3" placeholder="Cela signifie que l'information est partagée …"></div>
+  </div>
+  <div class="qcard" id="qtf4">
+    <div class="qnum">Affirmation 4</div>
+    <div class="qtext">Une carte de fidélité numérique ne fonctionne qu'en magasin, jamais en ligne.</div>
+    
+    <div class="tf" id="tf4"><button class="tfb" onclick="vrfx(this,'tf4')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf4')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf4" placeholder="En réalité elle permet d'identifier le client en … ET en …"></div>
+  </div>
+  <div class="qcard" id="qtf5">
+    <div class="qnum">Affirmation 5</div>
+    <div class="qtext">Multi-canal et omnicanal, c'est la même chose.</div>
+    
+    <div class="tf" id="tf5"><button class="tfb" onclick="vrfx(this,'tf5')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf5')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf5" placeholder="La différence principale est que dans l'omnicanal les canaux sont …"></div>
+  </div>
+  <div class="qcard" id="qtf6">
+    <div class="qnum">Affirmation 6</div>
+    <div class="qtext">Une borne interactive en magasin est un outil numérique qui participe à la stratégie omnicanale.</div>
+    
+    <div class="tf" id="tf6"><button class="tfb" onclick="vrfx(this,'tf6')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf6')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf6" placeholder="Elle relie le … au … pour permettre de commander…"></div>
+  </div>
+  <div class="qcard" id="qtf7">
+    <div class="qnum">Affirmation 7</div>
+    <div class="qtext">Le Drive est un exemple de Click &amp; Collect.</div>
+    
+    <div class="tf" id="tf7"><button class="tfb" onclick="vrfx(this,'tf7')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf7')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf7" placeholder="Le client commande et paie en … puis récupère ses courses au …"></div>
+  </div>
+  <div class="qcard" id="qtf8">
+    <div class="qnum">Affirmation 8</div>
+    <div class="qtext">Quand l'information est la même et à jour sur l'appli, le site et le SMS, on est dans une logique omnicanale.</div>
+    
+    <div class="tf" id="tf8"><button class="tfb" onclick="vrfx(this,'tf8')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf8')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf8" placeholder="Parce que tous les canaux sont … en même temps"></div>
+  </div>
+  <div class="qcard" id="qtf9">
+    <div class="qnum">Affirmation 9</div>
+    <div class="qtext">Le web-to-store (ROPO) consiste à chercher des informations sur internet avant d'acheter en magasin.</div>
+    
+    <div class="tf" id="tf9"><button class="tfb" onclick="vrfx(this,'tf9')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf9')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf9" placeholder="Le client utilise … pour … puis il …"></div>
+  </div>
+  <div class="qcard" id="qtf10">
+    <div class="qnum">Affirmation 10</div>
+    <div class="qtext">Dans l'e-réservation, le client doit obligatoirement payer en ligne avant de venir en magasin.</div>
+    
+    <div class="tf" id="tf10"><button class="tfb" onclick="vrfx(this,'tf10')">✓ Vrai</button><button class="tfb" onclick="vrfx(this,'tf10')">✗ Faux</button></div>
+    <div class="field-wrap"><div class="field-lbl">Justifie :</div><input class="field" id="ftf10" placeholder="Dans l'e-réservation, le client réserve en ligne puis …"></div>
+  </div>
+  <div class="alert danger" id="err6"></div>
+  <div class="alert result" id="res6"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="navDirect(5)">← Act.4</button>
+    <button class="btn-s" onclick="imprimerSection(6)">🖨 Imprimer mes réponses</button>
+    <button class="btn-p" onclick="valider(6)">Valider et continuer →</button>
+  </div>
+</div>
+
+<div class="sec" id="sec7">
+  <div class="shd">
+    <div class="snum">7</div>
+    <div><div class="stit">Activité 6 — Mots croisés : Omnicanalité</div><div class="ssub">Clique sur une case ou sur une définition, puis tape les lettres (sans accents ni tirets). 15 mots, notés sur 20 : il faut au moins 14 mots justes (18/20).</div></div>
+    <div class="dur">10 min</div>
+  </div>
+  <div class="card blue" style="font-size:12px;line-height:1.6">Un mot sur deux cases (Click &amp; Collect, e-commerce, web-to-store…) s'écrit <strong>en un seul mot, sans espace ni tiret</strong>. Le nombre de lettres est indiqué à côté de chaque définition. L'ordinateur te dit combien de mots sont justes, mais pas lesquels.</div>
+  <div style="overflow-x:auto;padding-bottom:6px"><div id="cw"></div></div>
+  <div class="cw-clues">
+    <div><div class="lbl">Horizontal →</div><div id="cl-h"></div></div>
+    <div><div class="lbl">Vertical ↓</div><div id="cl-d"></div></div>
+  </div>
+  <div class="alert danger" id="err7"></div>
+  <div class="alert result" id="res7"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="navDirect(6)">← Act.5</button>
+    <button class="btn-s" onclick="imprimerSection(7)">🖨 Imprimer ma grille</button>
+    <button class="btn-p" onclick="valider(7)">Valider et continuer →</button>
+  </div>
+</div>
+
+<div class="sec" id="sec8">
+  <div class="shd">
+    <div class="snum">8</div>
+    <div><div class="stit">Synthèse — Complète les trous, puis imprime ta fiche de cours</div><div class="ssub">Fais glisser (ou clique sur une étiquette puis sur un trou). Clique sur un trou rempli pour le vider. Notée sur 20 : 18/20 minimum pour imprimer.</div></div>
+    <div class="dur">15 min</div>
+  </div>
+  <div class="alert warn">⚠ Remplis les 20 trous, clique sur <strong>Valider ma synthèse</strong> : si tu as au moins 18/20, tu peux imprimer ta fiche.</div>
+  <div class="wbank" id="wbank">
+    <div class="wbank-lbl">🟡 Mots à placer — chaque mot sert une seule fois</div>
+    <div class="wchip" draggable="true" id="w1" ondragstart="wstart(event)">monocanal</div>
+    <div class="wchip" draggable="true" id="w2" ondragstart="wstart(event)">multi-canal</div>
+    <div class="wchip" draggable="true" id="w3" ondragstart="wstart(event)">séparés</div>
+    <div class="wchip" draggable="true" id="w4" ondragstart="wstart(event)">cross-canal</div>
+    <div class="wchip" draggable="true" id="w5" ondragstart="wstart(event)">reliés</div>
+    <div class="wchip" draggable="true" id="w6" ondragstart="wstart(event)">omnicanal</div>
+    <div class="wchip" draggable="true" id="w7" ondragstart="wstart(event)">temps réel</div>
+    <div class="wchip" draggable="true" id="w8" ondragstart="wstart(event)">unique</div>
+    <div class="wchip" draggable="true" id="w9" ondragstart="wstart(event)">web-to-store</div>
+    <div class="wchip" draggable="true" id="w10" ondragstart="wstart(event)">internet</div>
+    <div class="wchip" draggable="true" id="w11" ondragstart="wstart(event)">magasin</div>
+    <div class="wchip" draggable="true" id="w12" ondragstart="wstart(event)">Click &amp; Collect</div>
+    <div class="wchip" draggable="true" id="w13" ondragstart="wstart(event)">store-to-web</div>
+    <div class="wchip" draggable="true" id="w14" ondragstart="wstart(event)">borne interactive</div>
+    <div class="wchip" draggable="true" id="w15" ondragstart="wstart(event)">application mobile</div>
+    <div class="wchip" draggable="true" id="w16" ondragstart="wstart(event)">carte de fidélité</div>
+    <div class="wchip" draggable="true" id="w17" ondragstart="wstart(event)">étiquette électronique</div>
+    <div class="wchip" draggable="true" id="w18" ondragstart="wstart(event)">SAV multicanal</div>
+    <div class="wchip" draggable="true" id="w19" ondragstart="wstart(event)">phygital</div>
+    <div class="wchip" draggable="true" id="w20" ondragstart="wstart(event)">Drive</div>
+  </div>
+
+  <div class="synth-box" id="synth-print">
+    <div class="synth-head">Le parcours client omnicanal &nbsp;|&nbsp; 1re Bac Pro MCV &nbsp;|&nbsp; Nom : _________________ Prénom : _________________ Classe : ______</div>
+
+    <div class="lbl">1. Les niveaux de canal</div>
+    <div class="synth-p">Le <span class="blank" id="b1" ondragover="wallow(event)" ondrop="wdrop(event,'b1')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> n'utilise qu'un seul canal de vente. Dans le modèle <span class="blank" id="b2" ondragover="wallow(event)" ondrop="wdrop(event,'b2')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, les canaux sont <span class="blank" id="b3" ondragover="wallow(event)" ondrop="wdrop(event,'b3')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> : ils ne communiquent pas. Dans le <span class="blank" id="b4" ondragover="wallow(event)" ondrop="wdrop(event,'b4')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, les canaux sont <span class="blank" id="b5" ondragover="wallow(event)" ondrop="wdrop(event,'b5')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> : le client peut passer de l'un à l'autre. Dans l'<span class="blank" id="b6" ondragover="wallow(event)" ondrop="wdrop(event,'b6')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, tous les canaux sont synchronisés en <span class="blank" id="b7" ondragover="wallow(event)" ondrop="wdrop(event,'b7')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> et le client vit une expérience <span class="blank" id="b8" ondragover="wallow(event)" ondrop="wdrop(event,'b8')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> et fluide.</div>
+
+    <div class="lbl">2. Les parcours d'achat</div>
+    <div class="synth-p">Dans le <span class="blank" id="b9" ondragover="wallow(event)" ondrop="wdrop(event,'b9')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> (ROPO), le client se renseigne sur <span class="blank" id="b10" ondragover="wallow(event)" ondrop="wdrop(event,'b10')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> puis achète en <span class="blank" id="b11" ondragover="wallow(event)" ondrop="wdrop(event,'b11')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>. Dans le <span class="blank" id="b12" ondragover="wallow(event)" ondrop="wdrop(event,'b12')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, il commande et paie en ligne puis retire sa commande en magasin. Dans le <span class="blank" id="b13" ondragover="wallow(event)" ondrop="wdrop(event,'b13')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, il est en magasin et commande un produit absent du rayon sur la <span class="blank" id="b14" ondragover="wallow(event)" ondrop="wdrop(event,'b14')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</div>
+
+    <div class="lbl">3. Les outils numériques</div>
+    <div class="synth-p">L'<span class="blank" id="b15" ondragover="wallow(event)" ondrop="wdrop(event,'b15')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> permet de commander et de suivre une livraison. La <span class="blank" id="b16" ondragover="wallow(event)" ondrop="wdrop(event,'b16')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> numérique identifie le client sur tous les canaux. L'<span class="blank" id="b17" ondragover="wallow(event)" ondrop="wdrop(event,'b17')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> affiche un prix mis à jour automatiquement. Le <span class="blank" id="b18" ondragover="wallow(event)" ondrop="wdrop(event,'b18')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> est joignable par téléphone, appli et site web. Le <span class="blank" id="b20" ondragover="wallow(event)" ondrop="wdrop(event,'b20')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> permet de commander en ligne et de retirer ses courses au guichet. Le magasin devient <span class="blank" id="b19" ondragover="wallow(event)" ondrop="wdrop(event,'b19')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> : il associe le physique et le numérique.</div>
+
+    <div class="lbl">4. Mes notes par activité</div>
+    <table class="jtable" id="notes-tab"><thead><tr><th>Activité</th><th>Note /20</th></tr></thead><tbody></tbody></table>
+
+    <div class="lbl">5. Ce que je retiens pour l'évaluation</div>
+    <div style="border:1px solid #dde0e6;border-radius:8px;padding:.875rem;min-height:72px;font-size:13px;color:#aaa;outline:none" contenteditable="true">Clique ici et note les points clés à retenir…</div>
+  </div>
+
+  <div class="alert danger" id="err8"></div>
+  <div class="alert result" id="res8"></div>
+  <div class="nav">
+    <button class="btn-s" onclick="resetSynth()">🔄 Recommencer la synthèse</button>
+    <button class="btn-s" onclick="navDirect(7)">← Act.6</button>
+    <button class="btn-p" onclick="valider(8)">Valider ma synthèse</button>
+    <button class="btn-p" id="btn-print" onclick="window.print()" disabled style="opacity:.4;cursor:not-allowed">🖨 Imprimer ma synthèse</button>
+  </div>
+</div>
+
+
+</div>
+<script>
+const K = JSON.parse(decodeURIComponent(escape(atob("eyJvZDJiIjogMCwgIm9kOGIiOiAwLCAiZGExIjogMCwgImRhMiI6IDEsICJkYTMiOiAyLCAiZGE0IjogMywgImRhNSI6IDEsICJkYTYiOiAxLCAiZGE3IjogMywgImRhOCI6IDEsICJvYzYiOiAxLCAib2M1YiI6IDAsICJjYjEiOiAxLCAiY2IyIjogMCwgImNiMyI6IDIsICJjYjQiOiAyLCAiY2I1IjogMCwgImNiNiI6IDAsICJjYjciOiAwLCAiY2I4IjogMSwgIm9xMWEiOiAxLCAib3ExYiI6IDAsICJvcTFjIjogMCwgIm9xMmEiOiAyLCAib3EyYiI6IFswLCAxLCAyXSwgIm9xM2EiOiAwLCAib3E0YSI6IDEsICJvcTRiIjogMCwgIm9xNGMiOiAxLCAib3E1YSI6IDIsICJvcTViIjogWzAsIDFdLCAib3E2YSI6IDEsICJvcTZiIjogMCwgIm9wYSI6IDIsICJ0ZjEiOiAxLCAidGYyIjogMCwgInRmMyI6IDAsICJ0ZjQiOiAxLCAidGY1IjogMSwgInRmNiI6IDAsICJ0ZjciOiAwLCAidGY4IjogMCwgInRmOSI6IDAsICJ0ZjEwIjogMSwgIl9jaGlwcyI6IHsiZTEiOiAiYXYtd2ViIiwgImUyIjogImF2LXdlYiIsICJlMyI6ICJhdi13ZWIiLCAiZTQiOiAicGUtbWFnIiwgImU1IjogInBlLW1hZyIsICJlNiI6ICJhYy1hcHAiLCAiZTciOiAiYWMtd2ViIiwgImU4IjogImFwLXNtcyIsICJlOSI6ICJhcC1hcHAiLCAiZTEwIjogImFwLWFwcCIsICJlMTEiOiAiYXAtYXBwIiwgImUxMiI6ICJhcC1zbXMifSwgIl9jdyI6IHsiMSI6ICJQSFlHSVRBTCIsICIyIjogIkFDSEFUIiwgIjMiOiAiRklERUxJVEUiLCAiNCI6ICJXRUJUT1NUT1JFIiwgIjUiOiAiU0NBTiIsICI2IjogIkVOU0VJR05FIiwgIjciOiAiRFJJVkUiLCAiOCI6ICJCT1JORSIsICI5IjogIkVTTCIsICIxMCI6ICJBUFBMSUNBVElPTiIsICIxMSI6ICJDTElDS0NPTExFQ1QiLCAiMTIiOiAiQ1JPU1NDQU5BTCIsICIxMyI6ICJFQ09NTUVSQ0UiLCAiMTQiOiAiTVVMVElDQU5BTCIsICIxNSI6ICJPTU5JQ0FOQUxFIn0sICJfYmxhbmtzIjogeyIxIjogIm1vbm9jYW5hbCIsICIyIjogIm11bHRpLWNhbmFsIiwgIjMiOiAic8OpcGFyw6lzIiwgIjQiOiAiY3Jvc3MtY2FuYWwiLCAiNSI6ICJyZWxpw6lzIiwgIjYiOiAib21uaWNhbmFsIiwgIjciOiAidGVtcHMgcsOpZWwiLCAiOCI6ICJ1bmlxdWUiLCAiOSI6ICJ3ZWItdG8tc3RvcmUiLCAiMTAiOiAiaW50ZXJuZXQiLCAiMTEiOiAibWFnYXNpbiIsICIxMiI6ICJDbGljayAmIENvbGxlY3QiLCAiMTMiOiAic3RvcmUtdG8td2ViIiwgIjE0IjogImJvcm5lIGludGVyYWN0aXZlIiwgIjE1IjogImFwcGxpY2F0aW9uIG1vYmlsZSIsICIxNiI6ICJjYXJ0ZSBkZSBmaWTDqWxpdMOpIiwgIjE3IjogIsOpdGlxdWV0dGUgw6lsZWN0cm9uaXF1ZSIsICIxOCI6ICJTQVYgbXVsdGljYW5hbCIsICIxOSI6ICJwaHlnaXRhbCIsICIyMCI6ICJEcml2ZSJ9fQ=="))));
+const CW = [{"n": 1, "d": "d", "r": 0, "c": 14, "len": 8, "clue": "C'est le fait d'apporter les avantages du numérique dans le magasin physique."}, {"n": 2, "d": "h", "r": 1, "c": 12, "len": 5, "clue": "Action passée par un client, en ligne ou en magasin, pour obtenir des produits."}, {"n": 3, "d": "d", "r": 1, "c": 24, "len": 8, "clue": "Programme de récompense pour les achats réguliers : carte de …"}, {"n": 4, "d": "d", "r": 2, "c": 9, "len": 10, "clue": "Comportement d'un client qui fait ses recherches sur internet avant de se déplacer en magasin pour effectuer son achat."}, {"n": 5, "d": "d", "r": 2, "c": 19, "len": 4, "clue": "Outil portatif de l'équipier pour lire les codes-barres (nom court)."}, {"n": 6, "d": "h", "r": 3, "c": 9, "len": 8, "clue": "Marque ou nom commercial d'un magasin."}, {"n": 7, "d": "d", "r": 3, "c": 22, "len": 5, "clue": "Service où le client commande en ligne et récupère ses achats avec son véhicule, à une borne ou un quai dédié."}, {"n": 8, "d": "h", "r": 5, "c": 16, "len": 5, "clue": "Écran tactile en magasin permettant au client de commander un produit qui n'est pas en rayon pour se le faire livrer."}, {"n": 9, "d": "d", "r": 5, "c": 20, "len": 3, "clue": "Abréviation de l'étiquette électronique de rayon."}, {"n": 10, "d": "h", "r": 6, "c": 0, "len": 11, "clue": "Logiciel installé sur smartphone permettant de commander, scanner, cumuler des points."}, {"n": 11, "d": "h", "r": 7, "c": 13, "len": 12, "clue": "Service permettant au client de commander en ligne et de venir retirer sa commande directement en magasin."}, {"n": 12, "d": "d", "r": 7, "c": 18, "len": 10, "clue": "Niveau où les canaux communiquent entre eux : le client commence son parcours sur un canal et le termine sur un autre."}, {"n": 13, "d": "h", "r": 9, "c": 7, "len": 9, "clue": "Vente de produits ou de services réalisée à distance par l'intermédiaire d'internet."}, {"n": 14, "d": "d", "r": 11, "c": 14, "len": 10, "clue": "Fait d'utiliser plusieurs canaux de vente séparés."}, {"n": 15, "d": "h", "r": 15, "c": 11, "len": 10, "clue": "Stratégie qui connecte tous les canaux de vente pour une expérience continue."}];
+const SEUIL = 18; // note minimale pour passer (modifiable : 19, etc.)
+const NOMS = {2:'Act.1 · Darty',3:'Act.2 · Carrefour',4:'Act.3 · Situations',5:'Act.4 · Parcours',6:'Act.5 · Vrai/Faux',7:'Act.6 · Mots croisés',8:'Synthèse'};
+const NSEC = 8;
+let debloque=[1], codePending=null, passNote={}, tries={};
+
+function imprimerSection(n){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('print-active'));
+  const s=document.getElementById('sec'+n); if(s) s.classList.add('print-active');
+  window.print();
+  setTimeout(()=>document.querySelectorAll('.sec').forEach(s=>s.classList.remove('print-active')),1000);
+}
+function tryNav(n){ if(debloque.includes(n)) afficher(n); }
+function navDirect(n){ if(debloque.includes(n)) afficher(n); }
+function afficher(n){
+  for(let i=1;i<=NSEC;i++){
+    document.getElementById('sec'+i).classList.toggle('on',i===n);
+    const t=document.getElementById('t'+i);
+    t.classList.remove('active','done','locked');
+    if(!debloque.includes(i)) t.classList.add('locked');
+    else if(i<n) t.classList.add('done');
+    else if(i===n) t.classList.add('active');
+  }
+  document.getElementById('pb').style.width=Math.round(((n-1)/(NSEC-1))*100)+'%';
+  if(n===8) renderNotes();
+  window.scrollTo(0,0);
+}
+
+// ---------- Choix
+function choix(btn,grp){
+  const g=document.getElementById(grp);
+  if(g.dataset.multi==='1'){ btn.classList.toggle('sel'); }
+  else{ g.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+  const card=btn.closest('.qcard'); if(card) card.classList.remove('error');
+  g.classList.remove('has-error');
+}
+function vrfx(btn,grp){
+  document.getElementById(grp).querySelectorAll('.tfb').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const card=btn.closest('.qcard'); if(card) card.classList.remove('error');
+  document.getElementById(grp).classList.remove('has-error');
+}
+// groupes à réponses multiples
+['oq2b','oq5b'].forEach(id=>{const e=document.getElementById(id); if(e) e.dataset.multi='1';});
+document.querySelectorAll('input.field').forEach(i=>i.addEventListener('input',()=>{i.classList.remove('error');const c=i.closest('.qcard'); if(c) c.classList.remove('error');}));
+
+// ---------- Calcul de la note (rien n'est surligné : seulement des comptes)
+const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z]/g,'').toUpperCase();
+function itemsOf(n){
+  const res=[]; // booléens : true = bonne réponse
+  const sid='sec'+n;
+  Object.keys(K).filter(k=>k[0]!=='_').forEach(id=>{
+    const el=document.getElementById(id); if(!el||el.closest('.sec').id!==sid) return;
+    const sel=[...el.querySelectorAll(el.classList.contains('tf')?'.tfb':'.opt')].map((b,i)=>b.classList.contains('sel')?i:-1).filter(i=>i>=0);
+    const key=K[id];
+    if(Array.isArray(key)) res.push(sel.length===key.length && key.every(k=>sel.includes(k)));
+    else res.push(sel.length===1 && sel[0]===key);
+  });
+  if(n===5){
+    Object.keys(K._chips).forEach(cid=>{
+      const z=document.getElementById('z-'+K._chips[cid]);
+      res.push(!!z && [...z.children].some(c=>c.id.split('-')[0]===cid));
+    });
+  }
+  if(n===7){
+    CW.forEach(w=>{
+      let ans=''; cellsOf(w).forEach(([r,c])=>{ans+=norm(document.querySelector('[data-rc="'+r+','+c+'"] input').value);});
+      res.push(ans===K._cw[String(w.n)]);
+    });
+  }
+  if(n===8){
+    for(let i=1;i<=20;i++){ const b=document.getElementById('b'+i); res.push((b.textContent||'').trim()===K._blanks[String(i)]); }
+  }
+  return res;
+}
+function manquants(n){
+  const sec=document.getElementById('sec'+n); let cnt=0;
+  if(n===7||n===8){
+    if(n===8){ sec.querySelectorAll('.blank').forEach(b=>{ if(!b.classList.contains('filled')) cnt++; }); }
+    return cnt;
+  }
+  sec.querySelectorAll('.qcard').forEach(card=>{
+    let miss=false;
+    card.querySelectorAll('.opts[id]').forEach(og=>{ if(!og.querySelector('.opt.sel')){ og.classList.add('has-error'); miss=true; } });
+    card.querySelectorAll('.tf[id]').forEach(tf=>{ if(!tf.querySelector('.tfb.sel')){ tf.classList.add('has-error'); miss=true; } });
+    card.querySelectorAll('input.field,textarea.field').forEach(i=>{ if(!i.value.trim()){ i.classList.add('error'); miss=true; } });
+    if(miss){ card.classList.add('error'); cnt++; }
+  });
+  if(n===5){
+    let placed=0; sec.querySelectorAll('.dzone').forEach(z=>placed+=z.children.length);
+    if(placed<12) cnt+=12-placed;
+  }
+  return cnt;
+}
+function valider(n){
+  const err=document.getElementById('err'+n), res=document.getElementById('res'+n);
+  res.className='alert result'; res.textContent='';
+  const m=manquants(n);
+  if(m>0){
+    err.textContent='❌ Il reste '+m+(n===5?' étape(s) à placer ou ':' ')+(n===8?'trou(s) à remplir.':'question(s) sans réponse (encadrée(s) en rouge). Réponds à tout avant de valider.');
+    err.classList.add('show');
+    const f=document.querySelector('#sec'+n+' .qcard.error'); if(f) f.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  err.classList.remove('show');
+  const items=itemsOf(n), tot=items.length, bon=items.filter(Boolean).length, mauv=tot-bon;
+  tries[n]=(tries[n]||0)+1;
+  const note=Math.floor((bon/tot)*200)/10;
+  const noteTxt=note.toFixed(1).replace('.',',');
+  const ok=(bon/tot)*20>=SEUIL-1e-9;
+  const base='Note : '+noteTxt+' / 20 — '+bon+' bonne'+(bon>1?'s':'')+' réponse'+(bon>1?'s':'')+', '+mauv+' réponse'+(mauv>1?'s':'')+' fausse'+(mauv>1?'s':'')+' (sur '+tot+(n===7?' mots':' réponses notées')+'). Tentative n°'+tries[n]+'.';
+  res.classList.add('show');
+  if(ok){
+    passNote[n]=noteTxt;
+    res.classList.add('ok');
+    res.textContent='✅ '+base+' Bravo, tu as au moins '+SEUIL+'/20.';
+    if(n===8){
+      const p=document.getElementById('btn-print'); p.disabled=false; p.style.opacity=1; p.style.cursor='pointer';
+      renderNotes();
+    } else {
+      debloque.includes(n+1)||debloque.push(n+1);
+      res.innerHTML='';
+      res.appendChild(document.createTextNode('✅ '+base+' Bravo, tu as au moins '+SEUIL+'/20. '));
+      const bt=document.createElement('button'); bt.className='btn-p'; bt.style.marginLeft='8px'; bt.textContent='Passer à l\'activité suivante →'; bt.onclick=()=>afficher(n+1);
+      res.appendChild(bt);
+      afficher_refresh(n);
+    }
+  } else {
+    res.classList.add('ko');
+    res.textContent='🔒 '+base+' Il faut au moins '+SEUIL+'/20 pour continuer. Je ne te dis pas où sont les erreurs : relis le cours, vérifie tes réponses et recommence.';
+    if(n===8){ const p=document.getElementById('btn-print'); p.disabled=true; p.style.opacity=.4; p.style.cursor='not-allowed'; }
+  }
+  res.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function renderNotes(){
+  const tb=document.querySelector('#notes-tab tbody'); if(!tb) return;
+  tb.innerHTML='';
+  for(let i=2;i<=8;i++){
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td style="padding:6px 10px;border:1px solid #d0d3d9">'+NOMS[i]+'</td><td style="padding:6px 10px;border:1px solid #d0d3d9;text-align:center;font-weight:bold">'+(passNote[i]?passNote[i]+' / 20':'—')+'</td>';
+    tb.appendChild(tr);
+  }
+}
+
+// ---------- Passage à l'étape suivante (sans code)
+function goNext(n){ if(!debloque.includes(n+1)) debloque.push(n+1); afficher(n+1); }
+function afficher_refresh(n){ for(let i=1;i<=NSEC;i++){ const t=document.getElementById('t'+i); if(debloque.includes(i)) t.classList.remove('locked'); } }
+// ---------- Tableau du parcours (glisser OU cliquer ; clic sur une étiquette placée = la retirer)
+let selChip=null;
+function startDrag(e){ e.dataTransfer.setData('eid',e.target.id); }
+function allowDrop(e){ e.preventDefault(); e.currentTarget.classList.add('over'); }
+function leaveDrop(e){ e.currentTarget.classList.remove('over'); }
+function placeChip(eid,zid){
+  const src=document.getElementById(eid); const z=document.getElementById(zid);
+  if(!src||!z||src.classList.contains('placed')) return;
+  const cl=src.cloneNode(true);
+  cl.id=eid+'-'+zid; cl.removeAttribute('draggable'); cl.removeAttribute('ondragstart');
+  cl.classList.remove('sel-click');
+  cl.title='Clique pour retirer';
+  cl.onclick=()=>{ cl.remove(); src.classList.remove('placed'); };
+  z.appendChild(cl); src.classList.add('placed');
+}
+function dropChip(e,zid){ e.preventDefault(); e.currentTarget.classList.remove('over'); placeChip(e.dataTransfer.getData('eid'),zid); }
+document.querySelectorAll('#pool .chip').forEach(c=>c.addEventListener('click',()=>{
+  if(c.classList.contains('placed')) return;
+  document.querySelectorAll('#pool .chip').forEach(x=>x.classList.remove('sel-click'));
+  selChip=(selChip===c.id)?null:c.id; if(selChip) c.classList.add('sel-click');
+}));
+document.querySelectorAll('.dzone').forEach(z=>z.addEventListener('click',e=>{
+  if(e.target!==z||!selChip) return; placeChip(selChip,z.id); selChip=null;
+  document.querySelectorAll('#pool .chip').forEach(x=>x.classList.remove('sel-click'));
+}));
+function resetParcours(){
+  for(let i=1;i<=12;i++){ const el=document.getElementById('e'+i); if(el) el.classList.remove('placed','sel-click'); }
+  document.querySelectorAll('.dzone').forEach(dz=>{ while(dz.children.length) dz.removeChild(dz.lastChild); });
+  selChip=null;
+}
+
+// ---------- Synthèse (glisser OU cliquer)
+let wdragged=null, wsel=null;
+function wstart(e){ wdragged=e.target; e.dataTransfer.setData('wid',e.target.id); }
+function wallow(e){ e.preventDefault(); e.currentTarget.classList.add('dropover'); }
+function fillBlank(bid,word){
+  const b=document.getElementById(bid);
+  if(b.dataset.wid){ const old=document.getElementById(b.dataset.wid); if(old) old.classList.remove('used'); }
+  b.textContent=word.textContent; b.dataset.wid=word.id; b.classList.add('filled'); word.classList.add('used'); word.classList.remove('sel-click');
+}
+function wdrop(e,bid){
+  e.preventDefault(); document.getElementById(bid).classList.remove('dropover');
+  if(!wdragged) return; fillBlank(bid,wdragged); wdragged=null;
+}
+document.querySelectorAll('.wchip').forEach(w=>w.addEventListener('click',()=>{
+  if(w.classList.contains('used')) return;
+  document.querySelectorAll('.wchip').forEach(x=>x.classList.remove('sel-click'));
+  wsel=(wsel===w.id)?null:w.id; if(wsel) w.classList.add('sel-click');
+}));
+document.querySelectorAll('.blank').forEach(b=>b.addEventListener('click',()=>{
+  if(b.classList.contains('filled')){
+    const w=document.getElementById(b.dataset.wid); if(w) w.classList.remove('used');
+    b.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; b.classList.remove('filled'); delete b.dataset.wid;
+  } else if(wsel){ fillBlank(b.id,document.getElementById(wsel)); wsel=null; }
+}));
+function resetSynth(){
+  document.querySelectorAll('.blank').forEach(b=>{ b.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; b.classList.remove('filled','dropover'); delete b.dataset.wid; });
+  document.querySelectorAll('.wchip').forEach(w=>w.classList.remove('used','sel-click'));
+  wsel=null;
+}
+
+// ---------- Mots croisés
+function cellsOf(w){ const a=[]; for(let i=0;i<w.len;i++) a.push(w.d==='h'?[w.r,w.c+i]:[w.r+i,w.c]); return a; }
+let cwActive=null;
+(function buildCW(){
+  const cells={}; let R=0,C=0;
+  CW.forEach(w=>cellsOf(w).forEach(([r,c],i)=>{ const k=r+','+c; (cells[k]=cells[k]||{r,c,ws:[],num:null}).ws.push(w.n); if(i===0) cells[k].num=w.n; R=Math.max(R,r+1); C=Math.max(C,c+1); }));
+  const g=document.getElementById('cw'); g.style.gridTemplateColumns='repeat('+C+',27px)'; g.style.gridTemplateRows='repeat('+R+',27px)';
+  for(let r=0;r<R;r++) for(let c=0;c<C;c++){
+    const d=document.createElement('div');
+    const cell=cells[r+','+c];
+    if(cell){
+      d.className='cwc'; d.dataset.rc=r+','+c;
+      d.innerHTML=(cell.num?'<span class="nb">'+cell.num+'</span>':'')+'<input maxlength="1" autocomplete="off" aria-label="case">';
+      const inp=d.querySelector('input');
+      inp.addEventListener('focus',()=>{ const ws=cell.ws; if(!cwActive||!ws.includes(cwActive)) selectWord(ws[0]); });
+      inp.addEventListener('click',()=>{ if(cell.ws.length>1){ const i=cell.ws.indexOf(cwActive); selectWord(cell.ws[(i+1)%cell.ws.length]); } });
+      inp.addEventListener('input',()=>{ inp.value=inp.value.slice(-1); if(inp.value) moveNext(r,c,1); });
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Backspace'&&!inp.value){ moveNext(r,c,-1); }
+        else if(e.key==='ArrowRight') focusRC(r,c+1); else if(e.key==='ArrowLeft') focusRC(r,c-1);
+        else if(e.key==='ArrowDown') focusRC(r+1,c); else if(e.key==='ArrowUp') focusRC(r-1,c);
+      });
+    } else d.className='cwc-empty';
+    g.appendChild(d);
+  }
+  ['h','d'].forEach(dir=>{
+    const box=document.getElementById('cl-'+dir);
+    CW.filter(w=>w.d===dir).forEach(w=>{
+      const e=document.createElement('div'); e.className='cl'; e.id='cl'+w.n;
+      e.innerHTML='<b>'+w.n+'.</b> '+w.clue+' <span style="color:#888">('+w.len+' lettres)</span>';
+      e.onclick=()=>{ selectWord(w.n); const [r,c]=cellsOf(w)[0]; focusRC(r,c); };
+      box.appendChild(e);
+    });
+  });
+})();
+function focusRC(r,c){ const i=document.querySelector('[data-rc="'+r+','+c+'"] input'); if(i){ i.focus(); i.select(); } }
+function selectWord(n){
+  cwActive=n;
+  document.querySelectorAll('.cwc').forEach(x=>x.classList.remove('hl'));
+  document.querySelectorAll('.cl').forEach(x=>x.classList.remove('act'));
+  const w=CW.find(x=>x.n===n); if(!w) return;
+  cellsOf(w).forEach(([r,c])=>{ const d=document.querySelector('[data-rc="'+r+','+c+'"]'); if(d) d.classList.add('hl'); });
+  const cl=document.getElementById('cl'+n); if(cl) cl.classList.add('act');
+}
+function moveNext(r,c,dir){
+  const w=CW.find(x=>x.n===cwActive); if(!w) return;
+  if(w.d==='h') focusRC(r,c+dir); else focusRC(r+dir,c);
+}
+</script>
+</body>
+</html>
